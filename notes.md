@@ -292,7 +292,9 @@ lr 0.001                               , epochs = 7
                                                             
 now train from start, step 4, gamma 0.1, start-warm up to 0.001, 10 epochs                                                            
 ... changed the threshold for final prediction to 0.5... see what we can get
---> we got a better result : 0.8061 (run with full data set)
+--> we got a better result!!! : 0.8061 (run with full data set)
                                                     
 test the same parameter in CV, early stop on 8th epoch, best at 6th epoch, metric 0.4350 thing (epoch number starts from 1)
 continue traing from 8th epoch, as optimizer weights momentum changed, performs not good, -> to 0.440
+
+--> now, more aug level.

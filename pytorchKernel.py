@@ -491,12 +491,12 @@ class SIIMDataset(torch.utils.data.Dataset):
         if random.random() > 0.5:
             while True:
                 angle = random.uniform(-10, 10)
-                translate_x = int(random.uniform(-0.05, 0.05)*self.width)
-                translate_y = int(random.uniform(-0.1, 0.1)*self.height)
-                scale = random.uniform(0.8, 1.2)
+                translate_x = int(random.uniform(-0.05*2, 0.05*2)*self.width)
+                translate_y = int(random.uniform(-0.1*2, 0.1*2)*self.height)
+                scale = random.uniform(0.6, 1.2)
 
-                image = TF.affine(img, angle, (translate_x,translate_y), scale, shear=0)
-                segmentation = TF.affine(mask, angle, (translate_x,translate_y), scale, shear=0)
+                image = TF.affine(img, angle, (translate_x, translate_y), scale, shear=0)
+                segmentation = TF.affine(mask, angle, (translate_x, translate_y), scale, shear=0)
                 if pos_cnt > 0:
                     trans_pos_cnt = np.array(segmentation).sum()
                     if trans_pos_cnt/(pos_cnt*scale) < 0.95:
@@ -517,9 +517,10 @@ class SIIMDataset(torch.utils.data.Dataset):
                 image = TF.resize(image, (self.height, self.width))
                 segmentation = TF.resize(segmentation, (self.height, self.width))
 
-                gamma = random.uniform(0.75, 1.3333)
-                image = TF.adjust_gamma(image, gamma)
                 break
+        if random.random() > 0.5:
+            gamma = random.uniform(0.75, 1.3333)
+            image = TF.adjust_gamma(image, gamma)
         if random.random() > 0.5:
             image = TF.hflip(image)
             segmentation = TF.hflip(segmentation)
