@@ -115,7 +115,7 @@ class PS(KaggleKernel):
         imgs = imgs.reshape((-1, im_height, im_width, 1))
         return imgs
 
-    def prepare_train_data(self):
+    def prepare_train_dev_data(self):
         self._prepare_train_data_as_np()
 
     def _prepare_train_data_as_tf(self):  # just prepare train/dev here together
