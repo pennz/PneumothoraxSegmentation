@@ -297,4 +297,4 @@ now train from start, step 4, gamma 0.1, start-warm up to 0.001, 10 epochs
 test the same parameter in CV, early stop on 8th epoch, best at 6th epoch, metric 0.4350 thing (epoch number starts from 1)
 continue traing from 8th epoch, as optimizer weights momentum changed, performs not good, -> to 0.440
 
---> now, more aug level.
+--> now, more aug level. -> not better, random thing or aug too much? just revert it back
