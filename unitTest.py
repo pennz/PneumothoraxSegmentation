@@ -217,6 +217,24 @@ class PSKenelTest(unittest.TestCase):
         t.run_test()  # result is great!!!
         self.assertIsNotNone(t.detection_graph)
 
+    def test_analyze_RPN(self):
+        self.assertTrue(False)
+
+    def test_analyze_predict_error(self):
+        self.assertTrue(False)
+
+    def test_analyze_predict_score_threshold(self):
+        ts = np.exp([0.5, 0.6, 0.7])
+        for t in ts:
+            check_predict_statistics()
+        self.assertTrue(False)
+
+    def test_TTA(self):
+        self.assertTrue(False)
+
+    def test_L_loss(self):
+        self.assertTrue(False)
+
 
 if '__main__' == __name__:
     unittest.main()

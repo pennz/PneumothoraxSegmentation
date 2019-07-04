@@ -298,3 +298,6 @@ test the same parameter in CV, early stop on 8th epoch, best at 6th epoch, metri
 continue traing from 8th epoch, as optimizer weights momentum changed, performs not good, -> to 0.440
 
 --> now, more aug level. -> not better, random thing or aug too much? just revert it back
+
+check if run again, will CV output be different
+metric (averaged) is 0.43853221405297516, this time, loss decreases all the time (so it is lucky thing?)
