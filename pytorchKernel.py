@@ -62,7 +62,7 @@ class PS_torch(KaggleKernel):
         self.developing = True
 
         self.model_ft = None
-        self.num_epochs = 10
+        self.num_epochs = 8
         self.optimizer = None
         self.data_loader = None
         self.data_loader_dev = None
@@ -366,7 +366,7 @@ class PS_torch(KaggleKernel):
         tt = transforms.ToTensor()
         sublist = []
         counter = 0
-        threshold = 0.5  # changed from 0.25 to 0.5... need to check the data and analyze...(test on dev set)
+        threshold = 0.55  # changed from 0.25 to 0.5... need to check the data and analyze...(test on dev set)
         for index, row in tqdm(sample_df.iterrows(), total=len(sample_df)):
             image_id = row['ImageId']
             if image_id in masks_:
