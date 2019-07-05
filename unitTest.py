@@ -86,6 +86,7 @@ class PSKenelTest(unittest.TestCase):
     def test_pytorch_model_dev(self):
         k = pytorchKernel.PS_torch()
         #k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=True)  # will also analyze data
+        k._debug_less_data = True
         k.run(end_stage=utils.KernelRunningState.TRAINING_DONE, dump_flag=True)  # dump not working for torch
         self.assertIsNotNone(k)
 

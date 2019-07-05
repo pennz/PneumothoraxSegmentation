@@ -70,6 +70,13 @@ class PS_torch(KaggleKernel):
         self.lr_scheduler = None
 
         self.submit_run = False
+        # for debugging thing
+
+        self.metric_logger = utils.MetricLogger(delimiter="  ")
+        self.metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+        self.metric_logger.add_meter('loss', utils.SmoothedValue(window_size=100, fmt='{avg:.6f}'))
+        self.metric_logger.add_meter('loss_mask', utils.SmoothedValue(window_size=100, fmt='{avg:.6f}'))
+
 
     def analyze_data(self):
         pass
@@ -82,7 +89,7 @@ class PS_torch(KaggleKernel):
 
             if self.model_ft is not None:
                 torch.save(self.model_ft.state_dict(), 'cv_model.pth')
-            names_to_exclude = { 'model_ft', 'optimizer', 'lr_scheduler' }
+            names_to_exclude = { 'model_ft', 'optimizer', 'lr_scheduler', 'metric_logger' }
 
             data_to_save = {k:v for k,v in self_data.items() if k not in names_to_exclude}
 
@@ -109,11 +116,12 @@ class PS_torch(KaggleKernel):
         #self.lr_scheduler = self_data['lr_scheduler']
 
     @staticmethod
-    def eval_model_loss(model, data_loader, device, print_freq):
-        metric_logger = utils.MetricLogger(delimiter="  ")
+    def eval_model_loss(model, data_loader, device, metric_logger, print_freq):
+        #metric_logger = utils.MetricLogger(delimiter="  ")
         header = 'Evaluation'
         losses_summed = 0.
         cnt = 0
+        metric_logger.clear()
 
         # model.eval() # will output box, seg, scores
         with torch.no_grad():
@@ -134,13 +142,15 @@ class PS_torch(KaggleKernel):
 
                 metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
 
+        metric_logger.clear()
         return losses_summed/cnt
 
     @staticmethod
-    def eval_model(model, data_loader, device, print_freq):
-        metric_logger = utils.MetricLogger(delimiter="  ")
+    def eval_model(model, data_loader, device, metric_logger, print_freq):
+        #metric_logger = utils.MetricLogger(delimiter="  ")
         header = 'Evaluation'
         losses_reduced = float('inf')
+        metric_logger.clear()
 
         # model.eval() # will output box, seg, scores
         with torch.no_grad():
@@ -158,14 +168,17 @@ class PS_torch(KaggleKernel):
 
                 metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
 
+        metric_logger.clear()
         return losses_reduced.cpu().numpy()
 
     @staticmethod
-    def train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq):
+    def train_one_epoch(model, optimizer, data_loader, device, epoch, metric_logger, print_freq):
         model.train()
-        metric_logger = utils.MetricLogger(delimiter="  ")
-        metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
+        #metric_logger = utils.MetricLogger(delimiter="  ")
+        #metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
         header = 'Epoch: [{}]'.format(epoch)
+
+        metric_logger.clear()
 
         losses_summed = 0.
         cnt = 0
@@ -307,12 +320,12 @@ class PS_torch(KaggleKernel):
         es = utils.EarlyStopping(patience=patience)  # the first time it become worse, if patience set to 1
 
         for epoch in range(self.num_epochs):
-            train_loss = self.train_one_epoch(self.model_ft, self.optimizer, self.data_loader, self.device, epoch, print_freq=100)
+            train_loss = self.train_one_epoch(self.model_ft, self.optimizer, self.data_loader, self.device, epoch, self.metric_logger, print_freq=600)
             print(f'train_loss (averaged) is {train_loss}')
             self.lr_scheduler.step()  # change learning rate
 
             if not self.submit_run:
-                metric = self.eval_model_loss(self.model_ft, self.data_loader_dev, self.device, print_freq=100)
+                metric = self.eval_model_loss(self.model_ft, self.data_loader_dev, self.device, self.metric_logger, print_freq=150)
                 print(f'metric (averaged) is {metric}')
                 if es.step(metric):
                     print(f'{epoch+1} epochs run and early stop, with patience {patience}')
@@ -331,12 +344,12 @@ class PS_torch(KaggleKernel):
             patience = 0
         es = utils.EarlyStopping(patience=patience)  # the first time it become worse, if patience set to 1
         for epoch in range(8, 13):
-            train_loss = self.train_one_epoch(self.model_ft, self.optimizer, self.data_loader, self.device, epoch, print_freq=100)
+            train_loss = self.train_one_epoch(self.model_ft, self.optimizer, self.data_loader, self.device, epoch, self.metric_logger, print_freq=100)
             print(f'train_loss (averaged) is {train_loss}')
             self.lr_scheduler.step()  # change learning rate
 
             if not self.submit_run:
-                metric = self.eval_model_loss(self.model_ft, self.data_loader_dev, self.device, print_freq=100)
+                metric = self.eval_model_loss(self.model_ft, self.data_loader_dev, self.device, self.metric_logger, print_freq=100)
                 print(f'metric (averaged) is {metric}')
                 if es.step(metric):
                     print(f'{epoch+1} epochs run and early stop, with patience {patience}')
