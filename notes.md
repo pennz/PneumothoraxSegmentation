@@ -23,6 +23,11 @@ mask_e.mean()
 2. pydicom
 
 # todo
+check performance bottleneck:
+
+RPN -> classification, box, mask. need to use the cross one, to check where is the bottleneck
+
+7. just optimze the dice loss?  -> no, might not be helpful ---> we have found lovasz loss
 1. try work_number cpu-gpu, to be faster in training (4, 8, almost the same)
 2. ~cross validation, earlystop~
 4. add other data, conv together? might be helpful (only for class prediction)
@@ -30,7 +35,6 @@ mask_e.mean()
    value by preceding scholar!!!!!)
 3. oof
 6. add TTA flip and other things
-7. just optimze the dice loss?  -> no, might not be helpful ---> we have found lovasz loss
 
 !! to analyze main error term and model output
 !! dice metric for early stop (and show in MetricLogger)
@@ -233,7 +237,7 @@ MaskRCNN(
     )
   )
   (rpn): RegionProposalNetwork(
-    (anchor_generator): AnchorGenerator()
+    (**anchor_generator): AnchorGenerator()
     (head): RPNHead(
       (conv): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
       (cls_logits): Conv2d(256, 3, kernel_size=(1, 1), stride=(1, 1))

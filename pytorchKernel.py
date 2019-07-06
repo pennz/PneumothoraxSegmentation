@@ -69,13 +69,20 @@ class PS_torch(KaggleKernel):
         self.device = None
         self.lr_scheduler = None
 
-        self.submit_run = False
-        # for debugging thing
+        # data
+        self._stat_dataset = None
+        self.img_mean = [0.46877811,0.46877811,0.46877811]
+        self.img_std = [0.24535184,0.24535184,0.24535184]
+        # default value: mean:[0.46877811 0.46877811 0.46877811], std:[0.24535184 0.24535184 0.24535184]
 
+
+        self.submit_run = False
+
+        # for debugging thing
         self.metric_logger = utils.MetricLogger(delimiter="  ")
         self.metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
-        self.metric_logger.add_meter('loss', utils.SmoothedValue(window_size=100, fmt='{avg:.6f}'))
-        self.metric_logger.add_meter('loss_mask', utils.SmoothedValue(window_size=100, fmt='{avg:.6f}'))
+        self.metric_logger.add_meter('loss', utils.SmoothedValue(window_size=160, fmt='{avg:.6f}'))
+        self.metric_logger.add_meter('loss_mask', utils.SmoothedValue(window_size=160, fmt='{avg:.6f}'))
 
 
     def analyze_data(self):
@@ -233,6 +240,8 @@ class PS_torch(KaggleKernel):
 
         imgdir = "../input/siim-png-images/input/train_png/"
 
+        self._stat_dataset = SIIMDataset_split_df(df, imgdir, no_aug=True)  # for mean calculation
+
         if self.submit_run:
             df_train = df
         else:
@@ -245,7 +254,7 @@ class PS_torch(KaggleKernel):
             df_train = df[train_mask]
             df_dev = df[val_mask]
 
-            dataset_dev = SIIMDataset_split_df(df_dev,imgdir, no_aug=True)
+            dataset_dev = SIIMDataset_split_df(df_dev, imgdir, no_aug=True)
             self.data_loader_dev = torch.utils.data.DataLoader(
                 dataset_dev, batch_size=4, shuffle=True, num_workers=4,  # 4: 08:19, 8: 08:40
                 collate_fn=self._collate_fn_for_data_loader)
@@ -259,6 +268,17 @@ class PS_torch(KaggleKernel):
             dataset_train, batch_size=4, shuffle=True, num_workers=4,  # 4: 08:19, 8: 08:40
             collate_fn=self._collate_fn_for_data_loader)
 
+    def after_prepare_data_hook(self):
+        if self.img_mean is not None and self.img_std is not None:
+            return
+
+        stat_data_loader = torch.utils.data.DataLoader(
+            self._stat_dataset, batch_size=8, shuffle=False, num_workers=4,
+            collate_fn=self._collate_fn_for_data_loader)
+        self.img_mean, self.img_std = utils.online_mean_and_sd(stat_data_loader, data_map=lambda x: x[0])
+        self.metric_logger.print_and_log_to_file(f'mean:{self.img_mean}, std:{self.img_std}')
+        del stat_data_loader
+
     def build_and_set_model(self):
         # create mask rcnn model
         num_classes = 2
@@ -268,8 +288,10 @@ class PS_torch(KaggleKernel):
 
         # finetuning
 
-        # load a model pre-trained on COCO
-        self.model_ft = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
+        # load a model pre-trained on COCO, num_classes=91, cannot change.... as the pretrained model won't load
+        self.model_ft = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True,
+                                                                           image_mean=self.img_mean,
+                                                                           image_std=self.img_std)
         #FL = FocalLoss(gamma=2, alpha=0.75)  # Version 5, gamma=2, alpha=0.75, 0.8034...
         #FL = FocalLoss(gamma=1, alpha=0.75, magnifier=3)  # + early stop,2 stop at 7, (data split) version 7 0.8026
         #FL = FocalLoss(gamma=1, alpha=0.5, magnifier=3)  # version 8 0.8031, 6 epoch
@@ -321,15 +343,18 @@ class PS_torch(KaggleKernel):
 
         for epoch in range(self.num_epochs):
             train_loss = self.train_one_epoch(self.model_ft, self.optimizer, self.data_loader, self.device, epoch, self.metric_logger, print_freq=600)
-            print(f'train_loss (averaged) is {train_loss}')
+            self.metric_logger.print_and_log_to_file(f'train_loss (averaged) is {train_loss}')
             self.lr_scheduler.step()  # change learning rate
 
             if not self.submit_run:
                 metric = self.eval_model_loss(self.model_ft, self.data_loader_dev, self.device, self.metric_logger, print_freq=150)
-                print(f'metric (averaged) is {metric}')
+                self.metric_logger.print_and_log_to_file(f'\nmetric (averaged) is {metric}\n')
                 if es.step(metric):
-                    print(f'{epoch+1} epochs run and early stop, with patience {patience}')
+                    self.print_log(f'{epoch+1} epochs run and early stop, with patience {patience}')
                     break
+
+    def print_log(self, s):
+        self.metric_logger.print_and_log_to_file(s)
 
     def save_model(self):
         torch.save(self.model_ft.state_dict(), 'cv_model.pth')
@@ -527,8 +552,8 @@ class SIIMDataset(torch.utils.data.Dataset):
                 #contrast_f = random.uniform(-0.3, 0.3)
                 #image = TF.adjust_contrast(image, bright_f)
                 ##segmentation = TF.adjust_contrast(segmentation, bright_f)
-                image = TF.resize(image, (self.height, self.width))
-                segmentation = TF.resize(segmentation, (self.height, self.width))
+                #image = TF.resize(image, (self.height, self.width))
+                #segmentation = TF.resize(segmentation, (self.height, self.width))  # the network can accept different size
 
                 gamma = random.uniform(0.75, 1.3333)
                 image = TF.adjust_gamma(image, gamma)
