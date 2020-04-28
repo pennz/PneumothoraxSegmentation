@@ -13,6 +13,9 @@ from torch.autograd import Variable
 from IPython.core.debugger import set_trace
 
 
+# class CoordinatorTest():
+
+
 class PSKenelTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(PSKenelTest, self).__init__(*args, **kwargs)
@@ -28,47 +31,42 @@ class PSKenelTest(unittest.TestCase):
 
     def test_class(self):
         ps_kernel = kernel.PS()
-        self.assertEqual(len(ps_kernel.model_metrics), 0)
+        assert len(ps_kernel.model_metrics) == 0
 
     def test_dump_load_continue(self):
         ps_kernel = kernel.PS()
         ps_kernel.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
-        self.assertEqual(ps_kernel._stage,
-                         utils.KernelRunningState.TRAINING_DONE)
+        assert ps_kernel._stage == utils.KernelRunningState.TRAINING_DONE
 
         kernel_load_back = utils.KaggleKernel._load_state()
-        self.assertEqual(
-            kernel_load_back._stage, utils.KernelRunningState.TRAINING_DONE
-        )
+        assert kernel_load_back._stage == utils.KernelRunningState.TRAINING_DONE
         kernel_load_back.run()
-        self.assertEqual(
-            kernel_load_back._stage, utils.KernelRunningState.SAVE_SUBMISSION_DONE
-        )
+        assert kernel_load_back._stage == utils.KernelRunningState.SAVE_SUBMISSION_DONE
 
     def test_prepare_data(self):
         ps_kernel = kernel.PS()
         ps_kernel.run(
             end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
         )  # will also analyze data
-        self.assertIsNotNone(ps_kernel.train_X)
-        self.assertEqual(len(ps_kernel.train_X), len(ps_kernel.train_Y))
+        assert ps_kernel.train_X is not None
+        assert len(ps_kernel.train_X) == len(ps_kernel.train_Y)
         # self.assertIsNotNone(ps_kernel.test_X)  // don't care this now
-        self.assertIsNotNone(ps_kernel.dev_X)
-        self.assertEqual(len(ps_kernel.dev_X), len(ps_kernel.dev_Y))
+        assert ps_kernel.dev_X is not None
+        assert len(ps_kernel.dev_X) == len(ps_kernel.dev_Y)
 
     def test_train(self):
         kernel_load_back = utils.KaggleKernel._load_state(
             utils.KernelRunningState.PREPARE_DATA_DONE
         )
         kernel_load_back.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
-        self.assertIsNotNone(kernel_load_back.model)
+        assert kernel_load_back.model is not None
 
     def test_read_tf(self):
         k = kernel.PS()
         k._recover_from_tf()
         # k.run(start_stage=utils.KernelRunningState.PREPARE_DATA_DONE,
         # end_stage=utils.KernelRunningState.TRAINING_DONE)
-        self.assertIsNotNone(k.ds)
+        assert k.ds is not None
 
     # def test_convert_tf(self):
     #    kernel_withdata
@@ -89,7 +87,7 @@ class PSKenelTest(unittest.TestCase):
         k.data_loader.dataset._test_(2019)
         # k.run()  # dump not working for torch
 
-        self.assertIsNotNone(k)
+        assert k is not None
 
     def test_pytorch_model(self):
         k = pytorchKernel.PS_torch()
@@ -97,7 +95,7 @@ class PSKenelTest(unittest.TestCase):
         # dump_flag=True)  # will also analyze data
         k.submit_run = True
         k.run(dump_flag=True)  # dump not working for torch
-        self.assertIsNotNone(k)
+        assert k is not None
 
     def test_pytorch_model_dev(self):
         k = pytorchKernel.PS_torch()
@@ -107,7 +105,7 @@ class PSKenelTest(unittest.TestCase):
         k.run(
             end_stage=utils.KernelRunningState.TRAINING_DONE, dump_flag=True
         )  # dump not working for torch
-        self.assertIsNotNone(k)
+        assert k is not None
 
     def test_torch_show_model_detail(self):
         k = pytorchKernel.PS_torch()
@@ -150,8 +148,8 @@ class PSKenelTest(unittest.TestCase):
         l_dev = len(k.data_loader_dev)
         ratio = l / l_dev
 
-        self.assertGreater(ratio, 3.5)  # around 0.8/0.2
-        self.assertLess(ratio, 4.5)
+        assert ratio > 3.5  # around 0.8/0.2
+        assert ratio < 4.5
 
     def test_focal_loss_func(self):
         inputs = torch.tensor(
@@ -190,14 +188,13 @@ class PSKenelTest(unittest.TestCase):
             print(inputs_fl.grad.data)
             losses.append(fl_loss.data.numpy())
             grads.append(inputs_fl.grad.data.numpy())
-        self.assertEqual(losses[-1], losses[1])
+        assert losses[-1] == losses[1]
         if alpha_for_pos >= 0.5:
-            self.assertLess(losses[2], losses[1])
+            assert losses[2] < losses[1]
         else:
-            self.assertGreater(losses[2], losses[1])
+            assert losses[2] > losses[1]
 
-        self.assertEqual((grads[2][0, 1] / grads[1][0, 1]),
-                         (1 - alpha_for_pos) / 0.5)
+        assert (grads[2][0, 1] / grads[1][0, 1]) == (1 - alpha_for_pos) / 0.5
 
     def test_pytorch_starter_dump(self):
         k = pytorchKernel.PS_torch()
@@ -237,7 +234,7 @@ class PSKenelTest(unittest.TestCase):
     def test_convert_tf_from_start(self):  # won't work
         ps_kernel = kernel.PS()
         ps_kernel.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE)
-        self.assertTrue(os.path.isfile("train_dev.10.tfrec"))
+        assert os.path.isfile("train_dev.10.tfrec")
 
     def test_tf_model_zoo(self):
         t = modelTester.TF_model_zoo_tester()
@@ -246,7 +243,7 @@ class PSKenelTest(unittest.TestCase):
     def test_tf_model_zoo_model(self):
         t = modelTester.TF_model_zoo_tester()
         t.load_model()
-        self.assertIsNotNone(t.model)
+        assert t.model is not None
 
     def test_tf_model_zoo_model(self):
         t = modelTester.TF_model_zoo_tester()
@@ -254,25 +251,25 @@ class PSKenelTest(unittest.TestCase):
         t.run_prepare()
         # t.check_graph()
         t.run_test()  # result is great!!!
-        self.assertIsNotNone(t.detection_graph)
+        assert t.detection_graph is not None
 
     def test_analyze_RPN(self):
-        self.assertTrue(False)
+        assert False
 
     def test_analyze_predict_error(self):
-        self.assertTrue(False)
+        assert False
 
     def test_analyze_predict_score_threshold(self):
         ts = np.exp([0.5, 0.6, 0.7])
         for t in ts:
             check_predict_statistics()
-        self.assertTrue(False)
+        assert False
 
     def test_TTA(self):
-        self.assertTrue(False)
+        assert False
 
     def test_L_loss(self):
-        self.assertTrue(False)
+        assert False
 
     def test_dataset_mean_std(self):
         k = pytorchKernel.PS_torch()
@@ -283,7 +280,7 @@ class PSKenelTest(unittest.TestCase):
             end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=False
         )  # dump not working for torch
         k.pre_train()
-        self.assertIsNotNone(k.img_mean)
+        assert k.img_mean is not None
 
 
 if "__main__" == __name__:

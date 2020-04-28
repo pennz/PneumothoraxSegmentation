@@ -1,4 +1,5 @@
 import utils
+import logging
 from utils import KaggleKernel
 from glob import glob
 from sklearn.model_selection import KFold
@@ -24,6 +25,209 @@ from matplotlib import pyplot as plt
 
 # Plot inline
 # %matplotlib inline
+
+
+class KernelGroup:
+    "Kernel Group to try different combination of kernels hyperparameter"
+
+    def __init__(self, *kernels):
+        self.kernels = kernels
+
+
+class KaggleKernel:
+    def __init__(self):
+        self.model = None
+        self.model_metrics = []
+        self.model_loss = None
+
+        self.train_X = None
+        self.train_Y = None
+
+        self.dev_X = None
+        self.dev_Y = None
+
+        self.test_X = None
+
+        self.result_analyzer = None  # for analyze the result
+
+        self._stage = KernelRunningState.INIT_DONE
+        self.logger = None
+
+    def _add_logger_handler(self, handler):
+        self.logger.addHandler(handler)
+
+    def set_logger(self, name: str, level=logging.DEBUG: int, handler=None):
+        FORMAT = "[%(levelname)s]%(asctime)s:%(name)s:%(message)s"
+        logging.basicConfig(format=FORMAT)
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        if handler is not None:
+            logger.addHandler(rabbit)
+        self.logger = logger
+
+    def set_random_seed(self):
+        pass
+
+    def set_data_size(self):
+        "might be useful when test different input datasize"
+        pass
+
+    def save_model(self):
+        pass
+
+    def load_model_weight(self):
+        pass
+
+    def build_and_set_model(self):
+        pass
+
+    def train_model(self):
+        pass
+
+    def set_model(self):
+        pass
+
+    def set_loss(self):
+        pass
+
+    def set_metrics(self):
+        """
+        set_metrics for model training
+
+        :return: None
+        """
+        pass
+
+    def set_result_analyzer(self):
+        pass
+
+    def pre_prepare_data_hook(self):
+        pass
+
+    def after_prepare_data_hook(self):
+        pass
+
+    def prepare_train_dev_data(self):
+        pass
+
+    def prepare_test_data(self):
+        pass
+
+    def predict_on_test(self):
+        pass
+
+    def dump_state(self, exec_flag=False):
+        logger.debug(f"state {self._stage}")
+        if exec_flag:
+            logger.debug(f"dumping state {self._stage}")
+            # dump_obj(self, 'run_state.pkl', force=True)  # too large
+            dump_obj(self, f"run_state_{self._stage}.pkl", force=True)
+
+    def run(
+        self,
+        start_stage=None,
+        end_stage=KernelRunningState.SAVE_SUBMISSION_DONE,
+        dump_flag=False,
+    ):
+        """
+
+        :param start_stage: if set, will overwrite the stage
+        :param end_stage:
+        :param dump_flag:
+        :return:
+        """
+        self.continue_run(
+            start_stage=start_stage, end_stage=end_stage, dump_flag=dump_flag
+        )
+
+    def continue_run(
+        self,
+        start_stage=None,
+        end_stage=KernelRunningState.SAVE_SUBMISSION_DONE,
+        dump_flag=False,
+    ):
+        if start_stage is not None:
+            assert start_stage.value < end_stage.value
+            self._stage = start_stage
+
+        if self._stage.value < KernelRunningState.PREPARE_DATA_DONE.value:
+            self.pre_prepare_data_hook()
+            self.prepare_train_dev_data()
+            self.after_prepare_data_hook()
+
+            self._stage = KernelRunningState.PREPARE_DATA_DONE
+            self.dump_state(exec_flag=dump_flag)
+            if self._stage.value >= end_stage.value:
+                return
+
+        if self._stage.value < KernelRunningState.TRAINING_DONE.value:
+            self.pre_train()
+            self.build_and_set_model()
+            self.train_model()
+            self.after_train()
+
+            self.save_model()
+
+            self._stage = KernelRunningState.TRAINING_DONE
+            self.dump_state(exec_flag=dump_flag)
+            if self._stage.value >= end_stage.value:
+                return
+
+        if self._stage.value < KernelRunningState.EVL_DEV_DONE.value:
+            self.set_result_analyzer()
+
+            self._stage = KernelRunningState.EVL_DEV_DONE
+            self.dump_state(exec_flag=dump_flag)
+            if self._stage.value >= end_stage.value:
+                return
+
+        if self._stage.value < KernelRunningState.SAVE_SUBMISSION_DONE.value:
+            self.pre_test()
+            self.prepare_test_data()
+            self.predict_on_test()
+            self.after_test()
+
+            self._stage = KernelRunningState.SAVE_SUBMISSION_DONE
+            self.dump_state(exec_flag=dump_flag)
+            if self._stage.value >= end_stage.value:
+                return
+
+    @classmethod
+    def _load_state(cls, stage=None, file_name="run_state.pkl"):
+        """
+
+        :param file_name:
+        :return: the kernel object, need to continue
+        """
+        if stage is not None:
+            file_name = f"run_state_{stage}.pkl"
+        logger.debug(f"restore from {file_name}")
+        return get_obj_or_dump(filename=file_name)
+
+    def load_state_data_only(self, file_name="run_state.pkl"):
+        pass
+
+    @classmethod
+    def load_state_continue_run(cls, file_name="run_state.pkl"):
+        """
+
+        :param file_name:
+        :return: the kernel object, need to continue
+        """
+        self = cls._load_state(file_name=file_name)
+        self.continue_run()
+
+    def pre_train(self):
+        pass
+
+    def after_train(self):
+        pass
+
+    def pre_test(self):
+        pass
+
+    def after_test(self):
+        pass
 
 
 class PS(KaggleKernel):
@@ -143,7 +347,7 @@ class PS(KaggleKernel):
         else:
             train_fns = sorted(glob(train_data_wildcard))
 
-        utils.logger.debug(f"train & dev counts: {len(train_fns)}")
+        self.logger.debug(f"train & dev counts: {len(train_fns)}")
         df_full = pd.read_csv(
             self.DATA_PATH_BASE + "/train-rle.csv", index_col="ImageId"
         )
@@ -156,7 +360,7 @@ class PS(KaggleKernel):
 
         train_fns = sorted(glob(train_data_wildcard))
 
-        utils.logger.debug(f"train & dev counts: {len(train_fns)}")
+        self.logger.debug(f"train & dev counts: {len(train_fns)}")
         df_full = pd.read_csv(
             self.DATA_PATH_BASE + "/train-rle.csv", index_col="ImageId"
         )
@@ -184,11 +388,11 @@ class PS(KaggleKernel):
             self.dev_X = images[val_ind]
             self.dev_Y = mask_e[val_ind]
 
-            utils.logger.debug(
+            self.logger.debug(
                 f"size: train_X {self.train_X.shape}, train_Y {self.train_Y.shape}"
             )
 
-            utils.logger.debug(sorted(glob("*")))
+            self.logger.debug(sorted(glob("*")))
             self.save_data_tf(file_name=f"train_dev.{i}.tfrec")
             del self.train_X
             del self.train_Y
@@ -236,7 +440,7 @@ class PS(KaggleKernel):
         # self.dev_ds = utils.PS_TF_DataHandler.train_input_fn_bt(None, None, BS, cv=True, cv_train=False, split_id=0, n_splits=split, ds=ds, ds_len=math.floor(len(all_X) * (1 / split)))
         self.dev_ds_len = math.floor(len(all_X) * (1 / split))
 
-        utils.logger.debug(f"dev set counts: {self.dev_ds_len} / {len(all_X)}")
+        self.logger.debug(f"dev set counts: {self.dev_ds_len} / {len(all_X)}")
 
         utils.PS_TF_DataHandler.to_tfrecord(self.ds, file_name=file_name)
 
@@ -291,7 +495,7 @@ class PS(KaggleKernel):
             test_fns = sorted(glob(test_data_wildcard))
         else:
             test_fns = sorted(glob(test_data_wildcard))
-        utils.logger.debug(f"test counts: {len(test_fns)}")
+        self.logger.debug(f"test counts: {len(test_fns)}")
 
     def build_and_set_model(self):
         def build_model(input_layer, start_neurons):
