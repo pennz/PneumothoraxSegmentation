@@ -1,56 +1,50 @@
 from __future__ import print_function
-import utils
-from utils import KaggleKernel
-from glob import glob
-from sklearn.model_selection import KFold
-import pandas as pd
-import numpy as np
-import pydicom
-import math
-
-from collections import defaultdict, deque
-import datetime
-import pickle
-import time
-import torch.distributed as dist
-import errno
 
 import collections
+import datetime
+import errno
+import functools
+import gc
+import math
 import os
+import pickle
+import random
+import time
+import types  # for bound new forward function for RoIHeads
+from collections import defaultdict, deque
+from glob import glob
+
 import numpy as np
+import pandas as pd
 import torch
-import torch.utils.data
+import torch.distributed as dist
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
-from PIL import Image, ImageFile
-import pandas as pd
-from tqdm import tqdm
+import torch.utils.data
 import torchvision
-import random
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 import torchvision.models.detection.roi_heads as roi_heads
-from torchvision.models.detection.roi_heads import (
-    fastrcnn_loss,
-    maskrcnn_loss,
-    keypointrcnn_loss,
-    keypointrcnn_inference,
-    maskrcnn_inference,
-)
-
-from torchvision.ops import boxes as box_ops
-from torchvision.ops import roi_align
-from torchvision.models.detection import _utils as det_utils
-from torchvision import transforms
-import types  # for bound new forward function for RoIHeads
-import functools
 import torchvision.transforms.functional as TF
-
-import gc
-
 from IPython.core.debugger import set_trace
 from matplotlib import pyplot as plt
+from PIL import Image, ImageFile
+from torch.autograd import Variable
+from torchvision import transforms
+from torchvision.models.detection import _utils as det_utils
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from torchvision.models.detection.roi_heads import (fastrcnn_loss,
+                                                    keypointrcnn_inference,
+                                                    keypointrcnn_loss,
+                                                    maskrcnn_inference,
+                                                    maskrcnn_loss)
+from torchvision.ops import boxes as box_ops
+from torchvision.ops import roi_align
+from tqdm import tqdm
+
+import pydicom
+import utils
+from sklearn.model_selection import KFold
+from utils import KaggleKernel
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 

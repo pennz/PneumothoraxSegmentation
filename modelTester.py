@@ -1,19 +1,21 @@
-from IPython.display import clear_output, display, HTML
-from object_detection.utils import visualization_utils as vis_util
-from object_detection.utils import label_map_util
-from object_detection.utils import ops as utils_ops
-from PIL import Image
-from matplotlib import pyplot as plt
-from io import StringIO
+import os
+import sys
+import tarfile
+import zipfile
 from collections import defaultdict
 from distutils.version import StrictVersion
-import zipfile
-import tensorflow as tf
-import tarfile
-import sys
-import six.moves.urllib as urllib
+from io import StringIO
+
 import numpy as np
-import os
+import six.moves.urllib as urllib
+import tensorflow as tf
+from IPython.display import HTML, clear_output, display
+from matplotlib import pyplot as plt
+from PIL import Image
+
+from object_detection.utils import label_map_util
+from object_detection.utils import ops as utils_ops
+from object_detection.utils import visualization_utils as vis_util
 
 os.chdir("/content/models/research")
 

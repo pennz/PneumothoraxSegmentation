@@ -1,27 +1,24 @@
-import utils
-import logging
-from utils import KaggleKernel
-from glob import glob
-from sklearn.model_selection import KFold
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
-import pydicom
-import math
-
-import tensorflow as tf
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input
-from tensorflow.keras.layers import Conv2D, Conv2DTranspose, Dropout
-from tensorflow.keras.layers import MaxPooling2D
-from tensorflow.keras.layers import concatenate
-from tensorflow.keras import backend as K
-from tensorflow.python.ops import math_ops
-
 import gc
+import logging
+import math
+from glob import glob
 
+import numpy as np
+import pandas as pd
+import tensorflow as tf
 from IPython.core.debugger import set_trace
 from matplotlib import pyplot as plt
+from tensorflow.keras import backend as K
+from tensorflow.keras.layers import (Conv2D, Conv2DTranspose, Dropout, Input,
+                                     MaxPooling2D, concatenate)
+from tensorflow.keras.models import Model
+from tensorflow.python.ops import math_ops
+from tqdm import tqdm
+
+import pydicom
+import utils
+from sklearn.model_selection import KFold
+from utils import KaggleKernel
 
 # Plot inline
 # %matplotlib inline
@@ -56,7 +53,7 @@ class KaggleKernel:
     def _add_logger_handler(self, handler):
         self.logger.addHandler(handler)
 
-    def set_logger(self, name: str, level=logging.DEBUG: int, handler=None):
+    def set_logger(self, name, level=logging.DEBUG, handler=None):
         FORMAT = "[%(levelname)s]%(asctime)s:%(name)s:%(message)s"
         logging.basicConfig(format=FORMAT)
         logger = logging.getLogger(name)

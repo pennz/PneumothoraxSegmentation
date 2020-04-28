@@ -1,17 +1,16 @@
-import unittest
-import kernel
-import numpy as np
-import utils
-import os
 import importlib
+import os
+import unittest
 
-# import modelTester
-import pytorchKernel
+import numpy as np
 import torch
+from IPython.core.debugger import set_trace
 from torch.autograd import Variable
 
-from IPython.core.debugger import set_trace
-
+import kernel
+# import modelTester
+import pytorchKernel
+import utils
 
 # class CoordinatorTest():
 

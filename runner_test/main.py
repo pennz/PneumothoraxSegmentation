@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
 from subprocess import call
 
+AMQPURL = "amqp://guest:guest@127.0.0.1/"
 
 with open("runner.sh", "w") as f:
     f.write(
@@ -16,7 +18,8 @@ PARAMS=$@
 
 ( test -d ${REPO} || git clone --depth=1 \
 https://github.com/${USER}/${REPO}.git ) && cd ${REPO} && \
-git checkout -b _${BRANCH} --track origin/${BRANCH} && \
+([[ x$(git rev-parse --abbrev-ref HEAD) == x_${BRANCH} ]] || \
+git checkout -b _${BRANCH} --track origin/${BRANCH} ) && \
 ( [[ x"$PHASE" == x"dev" ]]  && pytest ) && python main.py $PARAMS
 """
     )
@@ -28,8 +31,8 @@ call(
         "pennz",
         "PneumothoraxSegmentation",
         "master",
-        "dev",
-        "other",
-        "paras",
+        "dev",  # phase
+        AMQPURL,
+        "384",  # size 256+128
     ]
 )
