@@ -1,0 +1,55 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AMQPURL	runner_template/main.py	/^AMQPURL = "amqp:\/\/guest:guest@127.0.0.1\/"$/;"	v
+AMQPURL	utils.py	/^class AMQPURL:$/;"	c
+AMQPURL_DEV	utils.py	/^    class AMQPURL_DEV:$/;"	c	class:AMQPURL
+Coordinator	coordinator.py	/^class Coordinator:$/;"	c
+Runner	runner.py	/^class Runner:  # blade runner$/;"	c
+TestCoordinator	test_coord.py	/^class TestCoordinator:$/;"	c
+TestMain	test_coord.py	/^class TestMain:$/;"	c
+Vhost	utils.py	/^        Vhost = "drdsfaew"$/;"	v	class:AMQPURL.AMQPURL_DEV
+__init__	coordinator.py	/^    def __init__(self, tmp_path, title_prefix):$/;"	m	class:Coordinator
+__init__	runner.py	/^    def __init__(self, kernel_code="TestKernel", AMQPURL=None, **kwargs):$/;"	m	class:Runner
+__init__	utils.py	/^    def __init__($/;"	m	class:AMQPURL
+_attach_data_collector	runner.py	/^    def _attach_data_collector(self, kernel):$/;"	m	class:Runner
+_change_kernel_meta_info	coordinator.py	/^    def _change_kernel_meta_info(folder, name):$/;"	m	class:Coordinator
+_change_main_py	coordinator.py	/^    def _change_main_py(path, size, net, AMQPURL, seed):$/;"	m	class:Coordinator
+_get_result	coordinator.py	/^    def _get_result(self, timeout):$/;"	m	class:Coordinator
+args	main.py	/^    args = parser.parse_args()$/;"	v
+coordinator	test_coord.py	/^    coordinator = None$/;"	v	class:TestCoordinator
+create_runner	coordinator.py	/^    def create_runner(self, config, seed="2020"):$/;"	m	class:Coordinator
+description	main.py	/^        description="Main entry for computing worker.")$/;"	v
+format	runner.py	/^def format(self, record):$/;"	f
+get_logger	utils.py	/^def get_logger():$/;"	f
+help	main.py	/^        help="image size for inputing to network",$/;"	v
+help	main.py	/^        help="random seed",  # TODO we should just let it random internal$/;"	v
+host	utils.py	/^        host = "termite.rmq.cloudamqp.com"  # (Load balanced)$/;"	v	class:AMQPURL.AMQPURL_DEV
+logger	utils.py	/^logger = get_logger()$/;"	v
+metavar	main.py	/^        metavar="E",$/;"	v
+metavar	main.py	/^        metavar="S",$/;"	v
+parse_AMQP	runner.py	/^def parse_AMQP(url_str):$/;"	f
+parser	main.py	/^    parser = argparse.ArgumentParser($/;"	v
+passwd	utils.py	/^        passwd = "QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI"$/;"	v	class:AMQPURL.AMQPURL_DEV
+push	coordinator.py	/^    def push(runner):$/;"	m	class:Coordinator
+push_all	coordinator.py	/^    def push_all(self):$/;"	m	class:Coordinator
+push_listen	coordinator.py	/^    def push_listen(self):$/;"	m	class:Coordinator
+r	main.py	/^    r = runner.Runner(args.network, args.AMQPURL,$/;"	v
+runner_configs	test_coord.py	/^def runner_configs():$/;"	f
+setup_class	test_coord.py	/^    def setup_class(cls):$/;"	m	class:TestCoordinator
+setup_method	test_coord.py	/^    def setup_method(self, method):$/;"	m	class:TestCoordinator
+string	utils.py	/^    def string(self):$/;"	m	class:AMQPURL
+teardown_class	test_coord.py	/^    def teardown_class(cls):$/;"	m	class:TestCoordinator
+teardown_method	test_coord.py	/^    def teardown_method(self, method):$/;"	m	class:TestCoordinator
+template_path	coordinator.py	/^    template_path = "runner_template\/"$/;"	v	class:Coordinator
+test_call_local	test_coord.py	/^    def test_call_local(self):$/;"	m	class:TestMain
+test_call_remote_mq	test_coord.py	/^    def test_call_remote_mq(self):$/;"	m	class:TestMain
+test_create_runners	test_coord.py	/^    def test_create_runners(self, runner_configs):$/;"	m	class:TestCoordinator
+test_get_mq_back	test_coord.py	/^    def test_get_mq_back(self, runner_configs):$/;"	m	class:TestCoordinator
+test_push_runner	test_coord.py	/^    def test_push_runner(self, runner_configs):$/;"	m	class:TestCoordinator
+tmp_path	test_coord.py	/^    tmp_path = "."$/;"	v	class:TestCoordinator
+type	main.py	/^        type=int,  # nargs='+',$/;"	v
+username	utils.py	/^        username = "drdsfaew"$/;"	v	class:AMQPURL.AMQPURL_DEV
