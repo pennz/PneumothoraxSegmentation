@@ -16,6 +16,7 @@ from glob import glob
 
 import numpy as np
 import pandas as pd
+import pydicom
 import torch
 import torch.distributed as dist
 import torch.nn as nn
@@ -27,24 +28,25 @@ import torchvision.transforms.functional as TF
 from IPython.core.debugger import set_trace
 from matplotlib import pyplot as plt
 from PIL import Image, ImageFile
+from sklearn.model_selection import KFold
 from torch.autograd import Variable
 from torchvision import transforms
 from torchvision.models.detection import _utils as det_utils
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
-from torchvision.models.detection.roi_heads import (fastrcnn_loss,
-                                                    keypointrcnn_inference,
-                                                    keypointrcnn_loss,
-                                                    maskrcnn_inference,
-                                                    maskrcnn_loss)
+from torchvision.models.detection.roi_heads import (
+    fastrcnn_loss,
+    keypointrcnn_inference,
+    keypointrcnn_loss,
+    maskrcnn_inference,
+    maskrcnn_loss,
+)
 from torchvision.ops import boxes as box_ops
 from torchvision.ops import roi_align
 from tqdm import tqdm
 
-import pydicom
 import utils
-from sklearn.model_selection import KFold
-from utils import KaggleKernel
+from kernel import KaggleKernel
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 

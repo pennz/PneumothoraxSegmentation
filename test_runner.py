@@ -1,5 +1,6 @@
 import importlib
 import os
+import sys
 import unittest
 
 import numpy as np
@@ -8,9 +9,13 @@ from IPython.core.debugger import set_trace
 from torch.autograd import Variable
 
 import kernel
+
 # import modelTester
 import pytorchKernel
+
+# from kernel import Kernel
 import utils
+from kernel import KernelRunningState
 
 # class CoordinatorTest():
 
@@ -34,18 +39,18 @@ class PSKenelTest(unittest.TestCase):
 
     def test_dump_load_continue(self):
         ps_kernel = kernel.PS()
-        ps_kernel.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
-        assert ps_kernel._stage == utils.KernelRunningState.TRAINING_DONE
+        ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
+        assert ps_kernel._stage == KernelRunningState.TRAINING_DONE
 
         kernel_load_back = utils.KaggleKernel._load_state()
-        assert kernel_load_back._stage == utils.KernelRunningState.TRAINING_DONE
+        assert kernel_load_back._stage == KernelRunningState.TRAINING_DONE
         kernel_load_back.run()
-        assert kernel_load_back._stage == utils.KernelRunningState.SAVE_SUBMISSION_DONE
+        assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
     def test_prepare_data(self):
         ps_kernel = kernel.PS()
         ps_kernel.run(
-            end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
+            end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
         )  # will also analyze data
         assert ps_kernel.train_X is not None
         assert len(ps_kernel.train_X) == len(ps_kernel.train_Y)
@@ -55,21 +60,21 @@ class PSKenelTest(unittest.TestCase):
 
     def test_train(self):
         kernel_load_back = utils.KaggleKernel._load_state(
-            utils.KernelRunningState.PREPARE_DATA_DONE
+            KernelRunningState.PREPARE_DATA_DONE
         )
-        kernel_load_back.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
+        kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert kernel_load_back.model is not None
 
     def test_read_tf(self):
         k = kernel.PS()
         k._recover_from_tf()
-        # k.run(start_stage=utils.KernelRunningState.PREPARE_DATA_DONE,
-        # end_stage=utils.KernelRunningState.TRAINING_DONE)
+        # k.run(start_stage=KernelRunningState.PREPARE_DATA_DONE,
+        # end_stage=KernelRunningState.TRAINING_DONE)
         assert k.ds is not None
 
     # def test_convert_tf(self):
     #    kernel_withdata
-    #    = utils.KaggleKernel._load_state(utils.KernelRunningState.PREPARE_DATA_DONE)
+    #    = utils.KaggleKernel._load_state(KernelRunningState.PREPARE_DATA_DONE)
     #    k = kernel.PS()
     #    k._clone_data(kernel_withdata)
     #    k.after_prepare_data_hook()
@@ -79,8 +84,8 @@ class PSKenelTest(unittest.TestCase):
         self._prepare_data()
 
         k = pytorchKernel.PS_torch()
-        k.load_state_data_only(utils.KernelRunningState.PREPARE_DATA_DONE)
-        # k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE,
+        k.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
+        # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         k.data_loader.dataset._test_(1019)
         k.data_loader.dataset._test_(2019)
@@ -90,7 +95,7 @@ class PSKenelTest(unittest.TestCase):
 
     def test_pytorch_model(self):
         k = pytorchKernel.PS_torch()
-        # k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE,
+        # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         k.submit_run = True
         k.run(dump_flag=True)  # dump not working for torch
@@ -98,11 +103,11 @@ class PSKenelTest(unittest.TestCase):
 
     def test_pytorch_model_dev(self):
         k = pytorchKernel.PS_torch()
-        # k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE,
+        # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         # k._debug_less_data = True
         k.run(
-            end_stage=utils.KernelRunningState.TRAINING_DONE, dump_flag=True
+            end_stage=KernelRunningState.TRAINING_DONE, dump_flag=True
         )  # dump not working for torch
         assert k is not None
 
@@ -111,7 +116,7 @@ class PSKenelTest(unittest.TestCase):
         k._build_show_model_detail()  # not work
 
     def _prepare_data(self):
-        _stage = utils.KernelRunningState.PREPARE_DATA_DONE
+        _stage = KernelRunningState.PREPARE_DATA_DONE
         data_stage_file_name = f"run_state_{_stage}.pkl"
         if not os.path.isfile(data_stage_file_name):
             self.test_pytorch_starter_dump()
@@ -121,8 +126,7 @@ class PSKenelTest(unittest.TestCase):
         kernel_load_back = pytorchKernel.PS_torch()
 
         kernel_load_back.load_state_data_only(
-            utils.KernelRunningState.PREPARE_DATA_DONE
-        )
+            KernelRunningState.PREPARE_DATA_DONE)
         kernel_load_back.build_and_set_model()
         kernel_load_back.train_model()
 
@@ -130,7 +134,7 @@ class PSKenelTest(unittest.TestCase):
         k = pytorchKernel.PS_torch()
 
         k._debug_less_data = True
-        k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE)
+        k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
         k.build_and_set_model()
         k.num_epochs = 10
@@ -138,10 +142,10 @@ class PSKenelTest(unittest.TestCase):
 
     def test_cv_data_prepare(self):
         k = pytorchKernel.PS_torch()
-        k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=True)
+        k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True)
 
         k2 = pytorchKernel.PS_torch()
-        k2.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE)
+        k2.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
         l = len(k.data_loader)
         l_dev = len(k.data_loader_dev)
@@ -198,41 +202,38 @@ class PSKenelTest(unittest.TestCase):
     def test_pytorch_starter_dump(self):
         k = pytorchKernel.PS_torch()
         k.run(
-            end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
+            end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
         )  # will also analyze data
         # kernel_load_back = pytorchKernel.PS_torch()
 
-        # kernel_load_back.load_state_data_only(utils.KernelRunningState.PREPARE_DATA_DONE)
-        # kernel_load_back.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
+        # kernel_load_back.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
+        # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
     def test_pytorch_starter_load(self):
         kernel_load_back = pytorchKernel.PS_torch()
 
-        kernel_load_back.load_state_data_only(
-            utils.KernelRunningState.TRAINING_DONE)
+        kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back.load_model_weight()
 
     def test_pytorch_starter_load_continue_train(self):
         kernel_load_back = pytorchKernel.PS_torch()
 
-        kernel_load_back.load_state_data_only(
-            utils.KernelRunningState.TRAINING_DONE)
+        kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back._debug_continue_training = True
         kernel_load_back.load_model_weight_continue_train()
-        # kernel_load_back.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
+        # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
     def test_pytorch_starter_load_then_submit(self):
         kernel_load_back = pytorchKernel.PS_torch()
 
-        kernel_load_back.load_state_data_only(
-            utils.KernelRunningState.TRAINING_DONE)
+        kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back.load_model_weight()
         kernel_load_back.run()
-        # kernel_load_back.run(end_stage=utils.KernelRunningState.TRAINING_DONE)
+        # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
     def test_convert_tf_from_start(self):  # won't work
         ps_kernel = kernel.PS()
-        ps_kernel.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE)
+        ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
         assert os.path.isfile("train_dev.10.tfrec")
 
     def test_tf_model_zoo(self):
@@ -272,11 +273,11 @@ class PSKenelTest(unittest.TestCase):
 
     def test_dataset_mean_std(self):
         k = pytorchKernel.PS_torch()
-        # k.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE,
+        # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         k._debug_less_data = True
         k.run(
-            end_stage=utils.KernelRunningState.PREPARE_DATA_DONE, dump_flag=False
+            end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=False
         )  # dump not working for torch
         k.pre_train()
         assert k.img_mean is not None
