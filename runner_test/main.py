@@ -18,8 +18,8 @@ PARAMS=$@
 
 ( test -d ${REPO} || git clone --depth=1 \
 https://github.com/${USER}/${REPO}.git ) && cd ${REPO} && \
-([[ x$(git rev-parse --abbrev-ref HEAD) == x_${BRANCH} ]] || \
-git checkout -b _${BRANCH} --track origin/${BRANCH} ) && \
+([[ x$(git rev-parse --abbrev-ref HEAD) == x${BRANCH} ]] || \
+git checkout -b ${BRANCH} --track origin/${BRANCH} ) && \
 ( [[ x"$PHASE" == x"dev" ]]  && python -m pytest -v) && python main.py $PARAMS
 """
     )
