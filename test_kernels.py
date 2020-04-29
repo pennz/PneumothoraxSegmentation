@@ -22,13 +22,11 @@ import coordinator
 import pytest
 
 @pytest.mark.skip()
-class PSKenelTest(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super(PSKenelTest, self).__init__(*args, **kwargs)
-
+class TestPSKernel():
     # this function will run before every test. We re-initialize group in this
     # function. So for every test, new group is used.
-    def setUp(self):
+    @classmethod
+    def setup_class(cls):
         utils.logger.debug("Have a good day")
         importlib.reload(utils)
         importlib.reload(kernel)
