@@ -1,6 +1,7 @@
-import utils
-import np
 import pydicom
+
+import np
+import utils
 from utils import KaggleKernel
 
 
@@ -410,7 +411,6 @@ class PS(KaggleKernel):
             img = np.reshape(img, (1024, 1024))
             # plt.imshow(img)
             plt.imshow(m)
-            set_trace()
             break
 
     def _recover_from_tf(self):
