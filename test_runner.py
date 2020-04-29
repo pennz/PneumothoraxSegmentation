@@ -12,6 +12,7 @@ import kernel
 
 # import modelTester
 import pytorchKernel
+import runner
 
 # from kernel import Kernel
 import utils
@@ -28,11 +29,10 @@ class CoordinatorTest:
 class RunnerTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(RunnerTest, self).__init__(*args, **kwargs)
-        self.runner = Runner(AMQPURL="test")
+        self.runner = Runner(AMQPURL=runner.AMQPURL())
 
     def test_mq(self):
         self.runner._attach_data_collector(None)
-        assert self.runner.AMQPURL == "test"
 
 
 @pytest.mark.skip(reason="no way of currently testing this")
