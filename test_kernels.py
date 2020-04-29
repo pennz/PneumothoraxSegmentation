@@ -1,5 +1,8 @@
 import importlib
 import os
+import time
+import shutil
+import sys
 import unittest
 
 import numpy as np
@@ -17,32 +20,15 @@ import runner
 # from kernel import Kernel
 import utils
 from kernel import KernelRunningState
-from runner import Runner
+import coordinator
+import pytest
 
-
-@pytest.mark.skip(reason="no way of currently testing this")
-class CoordinatorTest:
-    def __init__(self, *args, **kwargs):
-        super(PSKenelTest, self).__init__(*args, **kwargs)
-
-
-class RunnerTest(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super(RunnerTest, self).__init__(*args, **kwargs)
-        self.runner = Runner(AMQPURL=runner.AMQPURL())
-
-    def test_mq(self):
-        self.runner._attach_data_collector(None)
-
-
-@pytest.mark.skip(reason="no way of currently testing this")
-class PSKenelTest(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super(PSKenelTest, self).__init__(*args, **kwargs)
-
+@pytest.mark.skip()
+class TestPSKernel():
     # this function will run before every test. We re-initialize group in this
     # function. So for every test, new group is used.
-    def setUp(self):
+    @classmethod
+    def setup_class(cls):
         utils.logger.debug("Have a good day")
         importlib.reload(utils)
         importlib.reload(kernel)
