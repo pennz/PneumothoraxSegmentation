@@ -1,5 +1,6 @@
 import importlib
 import os
+import time
 import shutil
 import sys
 import unittest
@@ -18,55 +19,9 @@ import pytorchKernel
 import utils
 from kernel import KernelRunningState
 import coordinator
+import pytest
 
-
-class CoordinatorTest():
-    def __init__(self, *args, **kwargs):
-        super(CoordinatorTest, self).__init__(*args, **kwargs)
-
-    def setup_class(self):
-        self.tmp_path = ".runners"
-        self.coordinator = coordinator.Coordinator()
-
-        print("setup_class called once for the class")
-
-    def teardown_class(self):
-        print("teardown_class called once for the class")
-
-
-    def setup_method(self):
-        shutil.rmtree(self.tmp_path)
-        os.mkdir(self.tmp_path)
-        print("setup_method called for every method")
-
-    def teardown_method(self):
-        shutil.rmtree(self.tmp_path)
-        print("teardown_method called for every method")
-
-
-    def test_one(self):
-        print("one")
-        assert True
-        print("one after")
-
-    def test_two(self):
-        print("two")
-        assert False
-        print("two after")
-
-    def test_three(self):
-        print("three")
-        assert True
-        print("three after")
-
-    def test_create_runners(self, runner_configs):
-        """Should just use unit test setup and teardown
-        """
-        for c in runner_configs:
-            r = self.coordinator.create_runner(c)
-        assert r.AMQPURL is not None
-
-
+@pytest.mark.skip()
 class PSKenelTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(PSKenelTest, self).__init__(*args, **kwargs)
