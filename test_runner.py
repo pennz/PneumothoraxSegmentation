@@ -4,6 +4,7 @@ import sys
 import unittest
 
 import numpy as np
+import pytest
 import torch
 from IPython.core.debugger import set_trace
 from torch.autograd import Variable
@@ -16,10 +17,26 @@ import pytorchKernel
 # from kernel import Kernel
 import utils
 from kernel import KernelRunningState
+from runner import Runner
 
-# class CoordinatorTest():
+
+@pytest.mark.skip(reason="no way of currently testing this")
+class CoordinatorTest:
+    def __init__(self, *args, **kwargs):
+        super(PSKenelTest, self).__init__(*args, **kwargs)
 
 
+class RunnerTest(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(RunnerTest, self).__init__(*args, **kwargs)
+        self.runner = Runner(AMQPURL="test")
+
+    def test_mq(self):
+        self.runner._attach_data_collector(None)
+        assert self.runner.AMQPURL == "test"
+
+
+@pytest.mark.skip(reason="no way of currently testing this")
 class PSKenelTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(PSKenelTest, self).__init__(*args, **kwargs)
