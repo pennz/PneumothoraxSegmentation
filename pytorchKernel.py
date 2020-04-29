@@ -1,18 +1,11 @@
 from __future__ import print_function
 
 import collections
-import datetime
 import errno
-import functools
 import gc
-import math
 import os
-import pickle
 import random
-import time
 import types  # for bound new forward function for RoIHeads
-from collections import defaultdict, deque
-from glob import glob
 
 import numpy as np
 import pandas as pd

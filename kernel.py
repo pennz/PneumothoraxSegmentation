@@ -1,8 +1,6 @@
 import gc
 import logging
-import math
 from enum import Enum
-from glob import glob
 
 import numpy as np
 import pandas as pd
@@ -80,7 +78,6 @@ class KaggleKernel:
 
     def set_data_size(self):
         "might be useful when test different input datasize"
-        pass
 
     def save_model(self):
         pass
@@ -106,7 +103,6 @@ class KaggleKernel:
 
         :return: None
         """
-        pass
 
     def set_result_analyzer(self):
         pass

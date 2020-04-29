@@ -1,10 +1,6 @@
 import os
-import sys
 import tarfile
-import zipfile
-from collections import defaultdict
 from distutils.version import StrictVersion
-from io import StringIO
 
 import numpy as np
 import six.moves.urllib as urllib
@@ -231,7 +227,6 @@ class TF_model_zoo_tester:
 
         loaded = tf.saved_model.load(self.PATH_TO_SAVED_MODEL)
 
-        pass
 
 
 def strip_consts(graph_def, max_const_size=32):
