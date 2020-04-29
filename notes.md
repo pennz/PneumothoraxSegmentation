@@ -307,3 +307,4 @@ check if run again, will CV output be different
 metric (averaged) is 0.43853221405297516, this time, loss decreases all the time (so it is lucky thing?)
 ---> yes, luck, this time metric (averaged) is 0.43460081052035093... at the end, and endof epoch 8, 0.43088699085637927
 -> another try, best at 8, 0.43550380077213047, end 10th, 0.4364475174807012
+for runner_test/kernel-metadata.json  , we use json, read template file and change some fileds. So it is for coordinator.
