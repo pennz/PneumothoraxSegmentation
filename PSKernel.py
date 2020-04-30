@@ -16,9 +16,7 @@ class PS(KaggleKernel):
     def _PS_init_(self):
         self.developing = True
         # self.train_dev_mask = None  # for train dev split
-        self.DATA_PATH_BASE = (
-            "../input/siim-acr-pneumothorax-segmentation-data/pneumothorax"
-        )
+        self.DATA_PATH_BASE = "../input/siim-train-test/pneumothorax"
         self._im_chan = 1
 
         self.BS = 16
