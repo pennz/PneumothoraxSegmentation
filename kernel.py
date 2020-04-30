@@ -190,7 +190,7 @@ class KaggleKernel:
                 return
 
     @classmethod
-    def _load_state(cls, stage=None, file_name="run_state.pkl"):
+    def _load_state(cls, stage=None, file_name="run_state.pkl", logger=None):
         """
 
         :param file_name:
@@ -198,20 +198,23 @@ class KaggleKernel:
         """
         if stage is not None:
             file_name = f"run_state_{stage}.pkl"
-        self.logger.debug(f"restore from {file_name}")
-        return utils.get_obj_or_dump(filename=file_name)
+        if logger is not None:
+            logger.debug(f"restore from {file_name}")
+        self = utils.get_obj_or_dump(filename=file_name)
+        self.logger = logger
+        return self
 
     def load_state_data_only(self, file_name="run_state.pkl"):
         pass
 
     @classmethod
-    def load_state_continue_run(cls, file_name="run_state.pkl"):
+    def load_state_continue_run(cls, file_name="run_state.pkl", logger=None):
         """
 
         :param file_name:
         :return: the kernel object, need to continue
         """
-        self = cls._load_state(file_name=file_name)
+        self = cls._load_state(file_name=file_name, logger=logger)
         self.continue_run()
 
     def pre_train(self):

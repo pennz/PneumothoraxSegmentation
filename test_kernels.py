@@ -140,7 +140,7 @@ class TestPSKernel:
         ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert ps_kernel._stage == KernelRunningState.TRAINING_DONE
 
-        kernel_load_back = kernel.KaggleKernel._load_state()
+        kernel_load_back = kernel.KaggleKernel._load_state(logger=mq_logger)
         assert kernel_load_back._stage == KernelRunningState.TRAINING_DONE
         kernel_load_back.run()
         assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
@@ -156,9 +156,9 @@ class TestPSKernel:
         assert ps_kernel.dev_X is not None
         assert len(ps_kernel.dev_X) == len(ps_kernel.dev_Y)
 
-    def test_train(self):
+    def test_train(self, mq_logger):
         kernel_load_back = kernel.KaggleKernel._load_state(
-            KernelRunningState.PREPARE_DATA_DONE
+            KernelRunningState.PREPARE_DATA_DONE, logger=mq_logger
         )
         kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert kernel_load_back.model is not None
