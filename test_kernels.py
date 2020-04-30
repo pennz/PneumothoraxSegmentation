@@ -342,33 +342,5 @@ class TestPSKernel:
         assert k.img_mean is not None
 
 
-def test_call_remote_mq(mq_logger):
-    call_params = [
-        "python",
-        "main.py",
-        "amqp://drdsfaew:QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI@termite.rmq.cloudamqp.com/drdsfaew",
-        "384",  # size 256+128
-        "123",
-        "intercept-resnet",
-    ]
-    mq_logger.debug(" ".join(call_params))
-    ret = call(call_params)
-    assert ret == 0
-
-
-def test_call_local(mq_logger):
-    call_params = [
-        "python",
-        "main.py",
-        "amqp://guest:guest@127.0.0.1/",
-        "384",  # size 256+128
-        "123",
-        "intercept-resnet",
-    ]
-    mq_logger.debug(" ".join(call_params))
-    ret = call(call_params)
-    assert ret == 0
-
-
 if "__main__" == __name__:
     unittest.main()
