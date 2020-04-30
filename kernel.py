@@ -25,6 +25,17 @@ class KernelRunningState(Enum):
     EVL_DEV_DONE = 4
     SAVE_SUBMISSION_DONE = 5
 
+    @staticmethod
+    def string(state_int_value):
+        names = [
+            "INIT_DONE",
+            "PREPARE_DATA_DONE",
+            "TRAINING_DONE",
+            "EVL_DEV_DONE",
+            "SAVE_SUBMISSION_DONE",
+        ]
+        return names[state_int_value]
+
 
 class KernelGroup:
     "Kernel Group to try different combination of kernels hyperparameter"
@@ -143,6 +154,11 @@ class KaggleKernel:
         end_stage=KernelRunningState.SAVE_SUBMISSION_DONE,
         dump_flag=False,
     ):
+        self.logger.debug(
+            "%s -> %s",
+            KernelRunningState.string(start_stage),
+            KernelRunningState.string(end_stage),
+        )
         if start_stage is not None:
             assert start_stage.value < end_stage.value
             self._stage = start_stage

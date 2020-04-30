@@ -1,3 +1,4 @@
+import gc
 import importlib
 import logging
 import os
@@ -101,6 +102,7 @@ class TestPSKernel:
     # function. So for every test, new group is used.
     @classmethod
     def setup_class(cls):
+        gc.enable()
         importlib.reload(utils)
         importlib.reload(kernel)
         importlib.reload(pytorchKernel)
@@ -130,20 +132,12 @@ class TestPSKernel:
 
     def teardown_method(self, method):
         self.logger.debug("teardown method %s", method)
+        gc.collect()
 
     def test_class(self, mq_logger):
         ps_kernel = PS(mq_logger)
+        set_trace()
         assert len(ps_kernel.model_metrics) == 0
-
-    def test_dump_load_continue(self, mq_logger):
-        ps_kernel = PS(mq_logger)
-        ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
-        assert ps_kernel._stage == KernelRunningState.TRAINING_DONE
-
-        kernel_load_back = kernel.KaggleKernel._load_state(logger=mq_logger)
-        assert kernel_load_back._stage == KernelRunningState.TRAINING_DONE
-        kernel_load_back.run()
-        assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
     def test_prepare_data(self, mq_logger):
         ps_kernel = PS(mq_logger)
@@ -155,6 +149,16 @@ class TestPSKernel:
         # self.assertIsNotNone(ps_kernel.test_X)  // don't care this now
         assert ps_kernel.dev_X is not None
         assert len(ps_kernel.dev_X) == len(ps_kernel.dev_Y)
+
+    def test_dump_load_continue(self, mq_logger):
+        ps_kernel = PS(mq_logger)
+        ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
+        assert ps_kernel._stage == KernelRunningState.TRAINING_DONE
+
+        kernel_load_back = kernel.KaggleKernel._load_state(logger=mq_logger)
+        assert kernel_load_back._stage == KernelRunningState.TRAINING_DONE
+        kernel_load_back.run()
+        assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
     def test_train(self, mq_logger):
         kernel_load_back = kernel.KaggleKernel._load_state(
