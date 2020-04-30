@@ -11,6 +11,7 @@ from IPython.core.debugger import set_trace
 from torch.autograd import Variable
 
 import kernel
+import modelTester
 
 # import modelTester
 import pytorchKernel

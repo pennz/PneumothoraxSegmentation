@@ -38,6 +38,7 @@ from torchvision.ops import boxes as box_ops
 from torchvision.ops import roi_align
 from tqdm import tqdm
 
+import kernel
 import utils
 from kernel import KaggleKernel
 
@@ -81,7 +82,7 @@ class PS_torch(KaggleKernel):
         self.metric_logger.add_meter(
             "loss_mask", utils.SmoothedValue(window_size=160, fmt="{avg:.6f}")
         )
-        self.DATA_PATH_BASE = "/kaggle/input/siimacr-pneumothorax-segmentation-data-256"
+        self.DATA_PATH_BASE = "/kaggle/input/siimacr-pneumothorax-segmentation-data-128"
 
     def analyze_data(self):
         pass
