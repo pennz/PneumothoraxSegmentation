@@ -187,14 +187,14 @@ class PS(KaggleKernel):
             )
 
             self.logger.debug(sorted(glob("*")))
-            self.save_data_tf(file_name=f"train_dev.{i}.tfrec")
-            del self.train_X
-            del self.train_Y
-            del self.dev_X
-            del self.dev_Y
-            del images
-            del mask_e
-            gc.collect()
+            # self.save_data_tf(file_name=f"train_dev.{i}.tfrec")
+            # del self.train_X # not del if not save to tfrec
+            # del self.train_Y
+            # del self.dev_X
+            # del self.dev_Y
+            # del images
+            # del mask_e
+            # gc.collect()
 
     def _clone_data(self, src):
         self.model = src.model

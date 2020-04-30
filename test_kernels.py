@@ -147,6 +147,7 @@ class TestPSKernel:
         kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert kernel_load_back.model is not None
 
+    @pytest.mark.skip("take too long to test, just skip")
     def test_read_tf(self, mq_logger):
         k = PS(mq_logger)
         k._recover_from_tf()
