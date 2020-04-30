@@ -320,8 +320,8 @@ class TestPSKernel:
 
     def test_analyze_predict_score_threshold(self):
         ts = np.exp([0.5, 0.6, 0.7])
-        for t in ts:
-            check_predict_statistics()
+        # for t in ts:
+        #     check_predict_statistics()
         assert False
 
     def test_TTA(self):
