@@ -1,8 +1,8 @@
+import numpy as np
 import pydicom
 
-import np
 import utils
-from utils import KaggleKernel
+from kernel import KaggleKernel
 
 
 class PS(KaggleKernel):
