@@ -50,8 +50,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class PS_torch(KaggleKernel):
-    def __init__(self):
-        super(PS_torch, self).__init__()
+    def __init__(self, *args, **kargs):
+        super(PS_torch, self).__init__(*args, **kargs)
         self.developing = True
 
         self.model_ft = None
