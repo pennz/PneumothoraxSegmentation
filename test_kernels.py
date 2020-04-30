@@ -1,8 +1,6 @@
 import importlib
-import logging
 import os
 import unittest
-from subprocess import call
 
 import numpy as np
 import pytest
