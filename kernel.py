@@ -114,9 +114,9 @@ class KaggleKernel:
         pass
 
     def dump_state(self, exec_flag=False):
-        logger.debug(f"state {self._stage}")
+        self.logger.debug(f"state {self._stage}")
         if exec_flag:
-            logger.debug(f"dumping state {self._stage}")
+            self.logger.debug(f"dumping state {self._stage}")
             # dump_obj(self, 'run_state.pkl', force=True)  # too large
             utils.dump_obj(self, f"run_state_{self._stage}.pkl", force=True)
 
@@ -198,7 +198,7 @@ class KaggleKernel:
         """
         if stage is not None:
             file_name = f"run_state_{stage}.pkl"
-        logger.debug(f"restore from {file_name}")
+        self.logger.debug(f"restore from {file_name}")
         return utils.get_obj_or_dump(filename=file_name)
 
     def load_state_data_only(self, file_name="run_state.pkl"):

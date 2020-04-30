@@ -37,7 +37,7 @@ class PSKenelTest(unittest.TestCase):
         ps_kernel.run(end_stage=kernel.KernelRunningState.TRAINING_DONE)
         assert ps_kernel._stage == kernel.KernelRunningState.TRAINING_DONE
 
-        kernel_load_back = utils.KaggleKernel._load_state()
+        kernel_load_back = kernel.KaggleKernel._load_state()
         assert kernel_load_back._stage == kernel.KernelRunningState.TRAINING_DONE
         kernel_load_back.run()
         assert kernel_load_back._stage == kernel.KernelRunningState.SAVE_SUBMISSION_DONE
@@ -54,7 +54,7 @@ class PSKenelTest(unittest.TestCase):
         assert len(ps_kernel.dev_X) == len(ps_kernel.dev_Y)
 
     def test_train(self):
-        kernel_load_back = utils.KaggleKernel._load_state(
+        kernel_load_back = kernel.KaggleKernel._load_state(
             kernel.KernelRunningState.PREPARE_DATA_DONE
         )
         kernel_load_back.run(end_stage=kernel.KernelRunningState.TRAINING_DONE)
@@ -69,7 +69,7 @@ class PSKenelTest(unittest.TestCase):
 
     # def test_convert_tf(self):
     #    kernel_withdata
-    #    = utils.KaggleKernel._load_state(kernel.KernelRunningState.PREPARE_DATA_DONE)
+    #    = kernel.KaggleKernel._load_state(kernel.KernelRunningState.PREPARE_DATA_DONE)
     #    k = kernel.PS()
     #    k._clone_data(kernel_withdata)
     #    k.after_prepare_data_hook()
