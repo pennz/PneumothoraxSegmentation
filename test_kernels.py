@@ -91,6 +91,31 @@ class TestPSKernel:
         importlib.reload(kernel)
         importlib.reload(pytorchKernel)
         # importlib.reload(modelTester)
+        log_args = {
+            "size": 384,
+            "network": "intercept",
+            "AMQPURL": "amqp://drdsfaew:QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI@termite.rmq.cloudamqp.com/drdsfaew",
+            "seed": 19999,
+        }
+        r = runner.Runner(
+            log_args["network"],
+            log_args["AMQPURL"],
+            size=log_args["size"],
+            seed=log_args["seed"],
+        )
+        r._attach_data_collector("")
+        cls.logger = r.logger
+        cls.logger.debug("Good day~")
+
+    @classmethod
+    def teardown_class(cls):
+        cls.logger.debug("Keep happy~")
+
+    def setup_method(self, method):
+        self.logger.debug("setup for method %s", method)
+
+    def teardown_method(self, method):
+        self.logger.debug("teardown method %s", method)
 
     def test_class(self, mq_logger):
         ps_kernel = PS(mq_logger)
