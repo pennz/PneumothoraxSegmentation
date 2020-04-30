@@ -1,6 +1,8 @@
 import importlib
+import logging
 import os
 import unittest
+from subprocess import call
 
 import numpy as np
 import pytest
@@ -17,11 +19,72 @@ import runner
 # from kernel import Kernel
 import utils
 from kernel import KernelRunningState
-import coordinator
-import pytest
 
-@pytest.mark.skip()
-class TestPSKernel():
+bar = logging.getLogger("bar")
+baz = logging.getLogger("baz")
+
+
+@pytest.fixture(scope="session")
+def args():
+    return {
+        "size": 384,
+        "network": "intercept",
+        "AMQPURL": "amqp://drdsfaew:QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI@termite.rmq.cloudamqp.com/drdsfaew",
+        "seed": 19999,
+    }
+
+
+@pytest.fixture(scope="session")
+def mq_logger():
+    log_args = {
+        "size": 384,
+        "network": "intercept",
+        "AMQPURL": "amqp://drdsfaew:QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI@termite.rmq.cloudamqp.com/drdsfaew",
+        "seed": 19999,
+    }
+    r = runner.Runner(
+        log_args["network"],
+        log_args["AMQPURL"],
+        size=log_args["size"],
+        seed=log_args["seed"],
+    )
+    r._attach_data_collector("")
+    _mq_logger = r.logger
+    return _mq_logger
+
+
+class TestMQLogger:
+    def test_runner_create(self, args):
+        r = runner.Runner(
+            args["network"], args["AMQPURL"], size=args["size"], seed=args["seed"]
+        )
+        assert r.AMQPURL is not None
+
+    def test_runner_logger_use_elsewhere(self, args):
+        r = runner.Runner(
+            args["network"], args["AMQPURL"], size=args["size"], seed=args["seed"]
+        )
+        assert r.AMQPURL is not None
+        r._attach_data_collector("")
+        assert r.logger is not None
+        r.logger.debug("use elsewhere")
+
+
+@pytest.yield_fixture(scope="session")
+def session_thing(mq_logger):
+    mq_logger.debug("constructing session thing")
+    yield
+    mq_logger.debug("destroying session thing")
+
+
+@pytest.yield_fixture
+def testcase_thing(mq_logger):
+    mq_logger.debug("constructing testcase thing")
+    yield
+    mq_logger.debug("destroying testcase thing")
+
+
+class TestPSKernel:
     # this function will run before every test. We re-initialize group in this
     # function. So for every test, new group is used.
     @classmethod
@@ -280,6 +343,34 @@ class TestPSKernel():
         )  # dump not working for torch
         k.pre_train()
         assert k.img_mean is not None
+
+
+def test_call_remote_mq():
+    call_params = [
+        "python",
+        "main.py",
+        "amqp://drdsfaew:QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI@termite.rmq.cloudamqp.com/drdsfaew",
+        "384",  # size 256+128
+        "123",
+        "intercept-resnet",
+    ]
+    utils.logger.debug(" ".join(call_params))
+    ret = call(call_params)
+    assert ret == 0
+
+
+def test_call_local():
+    call_params = [
+        "python",
+        "main.py",
+        "amqp://guest:guest@127.0.0.1/",
+        "384",  # size 256+128
+        "123",
+        "intercept-resnet",
+    ]
+    utils.logger.debug(" ".join(call_params))
+    ret = call(call_params)
+    assert ret == 0
 
 
 if "__main__" == __name__:
