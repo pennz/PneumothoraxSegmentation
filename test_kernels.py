@@ -92,12 +92,12 @@ class TestPSKernel:
         importlib.reload(pytorchKernel)
         # importlib.reload(modelTester)
 
-    def test_class(self):
-        ps_kernel = PS()
+    def test_class(self, mq_logger):
+        ps_kernel = PS(mq_logger)
         assert len(ps_kernel.model_metrics) == 0
 
-    def test_dump_load_continue(self):
-        ps_kernel = PS()
+    def test_dump_load_continue(self, mq_logger):
+        ps_kernel = PS(mq_logger)
         ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert ps_kernel._stage == KernelRunningState.TRAINING_DONE
 
@@ -106,8 +106,8 @@ class TestPSKernel:
         kernel_load_back.run()
         assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
-    def test_prepare_data(self):
-        ps_kernel = PS()
+    def test_prepare_data(self, mq_logger):
+        ps_kernel = PS(mq_logger)
         ps_kernel.run(
             end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
         )  # will also analyze data
@@ -124,8 +124,8 @@ class TestPSKernel:
         kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert kernel_load_back.model is not None
 
-    def test_read_tf(self):
-        k = PS()
+    def test_read_tf(self, mq_logger):
+        k = PS(mq_logger)
         k._recover_from_tf()
         # k.run(start_stage=KernelRunningState.PREPARE_DATA_DONE,
         # end_stage=KernelRunningState.TRAINING_DONE)
@@ -134,7 +134,7 @@ class TestPSKernel:
     # def test_convert_tf(self):
     #    kernel_withdata
     #    = utils.KaggleKernel._load_state(KernelRunningState.PREPARE_DATA_DONE)
-    #    k = PS()
+    #    k = PS(mq_logger)
     #    k._clone_data(kernel_withdata)
     #    k.after_prepare_data_hook()
 
@@ -290,8 +290,8 @@ class TestPSKernel:
         kernel_load_back.run()
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
-    def test_convert_tf_from_start(self):  # won't work
-        ps_kernel = PS()
+    def test_convert_tf_from_start(self, mq_logger):  # won't work
+        ps_kernel = PS(mq_logger)
         ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
         assert os.path.isfile("train_dev.10.tfrec")
 
