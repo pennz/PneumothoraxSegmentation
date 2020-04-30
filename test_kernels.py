@@ -19,6 +19,7 @@ import runner
 # from kernel import Kernel
 import utils
 from kernel import KernelRunningState
+from PSKernel import PS
 
 
 @pytest.fixture(scope="session")
@@ -92,11 +93,11 @@ class TestPSKernel:
         # importlib.reload(modelTester)
 
     def test_class(self):
-        ps_kernel = kernel.PS()
+        ps_kernel = PS()
         assert len(ps_kernel.model_metrics) == 0
 
     def test_dump_load_continue(self):
-        ps_kernel = kernel.PS()
+        ps_kernel = PS()
         ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
         assert ps_kernel._stage == KernelRunningState.TRAINING_DONE
 
@@ -106,7 +107,7 @@ class TestPSKernel:
         assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
     def test_prepare_data(self):
-        ps_kernel = kernel.PS()
+        ps_kernel = PS()
         ps_kernel.run(
             end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
         )  # will also analyze data
@@ -124,7 +125,7 @@ class TestPSKernel:
         assert kernel_load_back.model is not None
 
     def test_read_tf(self):
-        k = kernel.PS()
+        k = PS()
         k._recover_from_tf()
         # k.run(start_stage=KernelRunningState.PREPARE_DATA_DONE,
         # end_stage=KernelRunningState.TRAINING_DONE)
@@ -133,7 +134,7 @@ class TestPSKernel:
     # def test_convert_tf(self):
     #    kernel_withdata
     #    = utils.KaggleKernel._load_state(KernelRunningState.PREPARE_DATA_DONE)
-    #    k = kernel.PS()
+    #    k = PS()
     #    k._clone_data(kernel_withdata)
     #    k.after_prepare_data_hook()
 
@@ -290,7 +291,7 @@ class TestPSKernel:
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
     def test_convert_tf_from_start(self):  # won't work
-        ps_kernel = kernel.PS()
+        ps_kernel = PS()
         ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
         assert os.path.isfile("train_dev.10.tfrec")
 
