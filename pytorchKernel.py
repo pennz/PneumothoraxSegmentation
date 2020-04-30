@@ -545,7 +545,7 @@ class PS_torch(KaggleKernel):
         print(counter)
 
     def _build_show_model_detail(self):
-        self.run(end_stage=utils.KernelRunningState.PREPARE_DATA_DONE)
+        self.run(end_stage=kernel.KernelRunningState.PREPARE_DATA_DONE)
         self.build_and_set_model()
         # self.pre_test()
         # summary(self.model_ft, (1,1024,1024))
