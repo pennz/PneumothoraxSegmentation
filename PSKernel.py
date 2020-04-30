@@ -186,7 +186,7 @@ class PS(KaggleKernel):
                 f"size: train_X {self.train_X.shape}, train_Y {self.train_Y.shape}"
             )
 
-            self.logger.debug(sorted(glob("*")))
+            self.logger.debug(sorted(glob("*")))  # list file now
             # self.save_data_tf(file_name=f"train_dev.{i}.tfrec")
             # del self.train_X # not del if not save to tfrec
             # del self.train_Y
@@ -195,6 +195,7 @@ class PS(KaggleKernel):
             # del images
             # del mask_e
             # gc.collect()
+            # self.logger.debug(sorted(glob("*")))
 
     def _clone_data(self, src):
         self.model = src.model

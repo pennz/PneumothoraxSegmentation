@@ -118,7 +118,7 @@ class KaggleKernel:
         if exec_flag:
             logger.debug(f"dumping state {self._stage}")
             # dump_obj(self, 'run_state.pkl', force=True)  # too large
-            dump_obj(self, f"run_state_{self._stage}.pkl", force=True)
+            utils.dump_obj(self, f"run_state_{self._stage}.pkl", force=True)
 
     def run(
         self,

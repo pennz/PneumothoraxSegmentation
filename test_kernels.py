@@ -1,4 +1,5 @@
 import importlib
+import logging
 import os
 import unittest
 
@@ -18,6 +19,21 @@ import runner
 import utils
 from kernel import KernelRunningState
 from PSKernel import PS
+
+log_args = {
+    "size": 384,
+    "network": "intercept",
+    "AMQPURL": "amqp://drdsfaew:QrBHPPxbsd8IuIxKrCnX3-RGoLKaFhYI@termite.rmq.cloudamqp.com/drdsfaew",
+    "seed": 19999,
+}
+r = runner.Runner(
+    log_args["network"],
+    log_args["AMQPURL"],
+    size=log_args["size"],
+    seed=log_args["seed"],
+)
+r._attach_data_collector("")
+LOGGER = r.logger
 
 
 @pytest.fixture(scope="session")
