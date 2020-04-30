@@ -16,7 +16,7 @@ class PS(KaggleKernel):
     def _PS_init_(self):
         self.developing = True
         # self.train_dev_mask = None  # for train dev split
-        self.DATA_PATH_BASE = "../input/siim-train-test/pneumothorax"
+        self.DATA_PATH_BASE = "../input/siim-train-test"
         self._im_chan = 1
 
         self.BS = 16
@@ -125,7 +125,7 @@ class PS(KaggleKernel):
 
         self.logger.debug(f"train & dev counts: {len(train_fns)}")
         df_full = pd.read_csv(
-            self.DATA_PATH_BASE + "/train-rle.csv", index_col="ImageId"
+            os.path.join(self.DATA_PATH_BASE, "train-rle.csv"), index_col="ImageId"
         )
         self.ds = PS._PS_data_preprocess(train_fns, df_full, tf=True)
 
@@ -138,7 +138,7 @@ class PS(KaggleKernel):
 
         self.logger.debug(f"train & dev counts: {len(train_fns)}")
         df_full = pd.read_csv(
-            self.DATA_PATH_BASE + "/train-rle.csv", index_col="ImageId"
+            os.path.join(self.DATA_PATH_BASE, "train-rle.csv"), index_col="ImageId"
         )
 
         train_fns_splits = []
