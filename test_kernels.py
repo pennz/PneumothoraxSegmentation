@@ -85,8 +85,7 @@ class TestPSKernel:
     # this function will run before every test. We re-initialize group in this
     # function. So for every test, new group is used.
     @classmethod
-    def setup_class(cls, mq_logger):
-        mq_logger.debug("Have a good day")
+    def setup_class(cls):
         importlib.reload(utils)
         importlib.reload(kernel)
         importlib.reload(pytorchKernel)
