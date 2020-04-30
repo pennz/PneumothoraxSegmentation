@@ -175,7 +175,7 @@ class TestPSKernel:
         # end_stage=KernelRunningState.TRAINING_DONE)
         assert k.ds is not None
 
-    # def test_convert_tf(self):
+    # def test_convert_tf(self, mq_logger):
     #    kernel_withdata
     #    = kernel.KaggleKernel._load_state(KernelRunningState.PREPARE_DATA_DONE)
     #    k = PS(mq_logger)
@@ -183,10 +183,10 @@ class TestPSKernel:
     #    k.after_prepare_data_hook()
 
     #    self.assertTrue(os.path.isfile('train.tfrec'))
-    def test_data_aug(self):
+    def test_data_aug(self, mq_logger):
         self._prepare_data()
 
-        k = pytorchKernel.PS_torch()
+        k = pytorchKernel.PS_torch(mq_logger)
         k.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
@@ -196,16 +196,16 @@ class TestPSKernel:
 
         assert k is not None
 
-    def test_pytorch_model(self):
-        k = pytorchKernel.PS_torch()
+    def test_pytorch_model(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         k.submit_run = True
         k.run(dump_flag=True)  # dump not working for torch
         assert k is not None
 
-    def test_pytorch_model_dev(self):
-        k = pytorchKernel.PS_torch()
+    def test_pytorch_model_dev(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         # k._debug_less_data = True
@@ -214,8 +214,8 @@ class TestPSKernel:
         )  # dump not working for torch
         assert k is not None
 
-    def test_torch_show_model_detail(self):
-        k = pytorchKernel.PS_torch()
+    def test_torch_show_model_detail(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
         k._build_show_model_detail()  # not work
 
     def _prepare_data(self):
@@ -224,17 +224,17 @@ class TestPSKernel:
         if not os.path.isfile(data_stage_file_name):
             self.test_pytorch_starter_dump()
 
-    def test_FL_in_model_early_stop(self):
+    def test_FL_in_model_early_stop(self, mq_logger):
         self._prepare_data()
-        kernel_load_back = pytorchKernel.PS_torch()
+        kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(
             KernelRunningState.PREPARE_DATA_DONE)
         kernel_load_back.build_and_set_model()
         kernel_load_back.train_model()
 
-    def test_cv_train_dev(self):
-        k = pytorchKernel.PS_torch()
+    def test_cv_train_dev(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
 
         k._debug_less_data = True
         k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
@@ -243,11 +243,11 @@ class TestPSKernel:
         k.num_epochs = 10
         k.train_model()
 
-    def test_cv_data_prepare(self):
-        k = pytorchKernel.PS_torch()
+    def test_cv_data_prepare(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
         k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True)
 
-        k2 = pytorchKernel.PS_torch()
+        k2 = pytorchKernel.PS_torch(mq_logger)
         k2.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
         l = len(k.data_loader)
@@ -257,7 +257,7 @@ class TestPSKernel:
         assert ratio > 3.5  # around 0.8/0.2
         assert ratio < 4.5
 
-    def test_focal_loss_func(self):
+    def test_focal_loss_func(self, mq_logger):
         inputs = torch.tensor(
             [
                 [0.0, 0.2, 0.4, 0.0, 0.2, 0.4, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
@@ -302,32 +302,32 @@ class TestPSKernel:
 
         assert (grads[2][0, 1] / grads[1][0, 1]) == (1 - alpha_for_pos) / 0.5
 
-    def test_pytorch_starter_dump(self):
-        k = pytorchKernel.PS_torch()
+    def test_pytorch_starter_dump(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
         k.run(
             end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
         )  # will also analyze data
-        # kernel_load_back = pytorchKernel.PS_torch()
+        # kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         # kernel_load_back.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
-    def test_pytorch_starter_load(self):
-        kernel_load_back = pytorchKernel.PS_torch()
+    def test_pytorch_starter_load(self, mq_logger):
+        kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back.load_model_weight()
 
-    def test_pytorch_starter_load_continue_train(self):
-        kernel_load_back = pytorchKernel.PS_torch()
+    def test_pytorch_starter_load_continue_train(self, mq_logger):
+        kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back._debug_continue_training = True
         kernel_load_back.load_model_weight_continue_train()
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
-    def test_pytorch_starter_load_then_submit(self):
-        kernel_load_back = pytorchKernel.PS_torch()
+    def test_pytorch_starter_load_then_submit(self, mq_logger):
+        kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back.load_model_weight()
@@ -339,16 +339,16 @@ class TestPSKernel:
         ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
         assert os.path.isfile("train_dev.10.tfrec")
 
-    # def test_tf_model_zoo(self):
+    # def test_tf_model_zoo(self, mq_logger):
     #     t = modelTester.TF_model_zoo_tester()
     #     t.run_logic()
 
-    # def test_tf_model_zoo_model(self):
+    # def test_tf_model_zoo_model(self, mq_logger):
     #     t = modelTester.TF_model_zoo_tester()
     #     t.load_model()
     #     assert t.model is not None
 
-    # def test_tf_model_zoo_model(self):
+    # def test_tf_model_zoo_model(self, mq_logger):
     #     t = modelTester.TF_model_zoo_tester()
     #     t.set_model("mask_rcnn_resnet101_atrous_coco_2018_01_28")
     #     t.run_prepare()
@@ -356,26 +356,26 @@ class TestPSKernel:
     #     t.run_test()  # result is great!!!
     #     assert t.detection_graph is not None
 
-    def test_analyze_RPN(self):
+    def test_analyze_RPN(self, mq_logger):
         assert False
 
-    def test_analyze_predict_error(self):
+    def test_analyze_predict_error(self, mq_logger):
         assert False
 
-    def test_analyze_predict_score_threshold(self):
+    def test_analyze_predict_score_threshold(self, mq_logger):
         ts = np.exp([0.5, 0.6, 0.7])
         # for t in ts:
         #     check_predict_statistics()
         assert False
 
-    def test_TTA(self):
+    def test_TTA(self, mq_logger):
         assert False
 
-    def test_L_loss(self):
+    def test_L_loss(self, mq_logger):
         assert False
 
-    def test_dataset_mean_std(self):
-        k = pytorchKernel.PS_torch()
+    def test_dataset_mean_std(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         k._debug_less_data = True
