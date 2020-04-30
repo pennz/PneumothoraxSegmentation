@@ -8,8 +8,8 @@ from kernel import KaggleKernel
 
 
 class PS(KaggleKernel):
-    def __init__(self):
-        super(PS, self).__init__()
+    def __init__(self, *args, **kargs):
+        super(PS, self).__init__(*args, **kargs)
         self._PS_init_()
 
     def _PS_init_(self):

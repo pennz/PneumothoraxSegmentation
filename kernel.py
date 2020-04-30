@@ -43,7 +43,7 @@ class KernelGroup:
 
 
 class KaggleKernel:
-    def __init__(self):
+    def __init__(self, logger=None):
         self.model = None
         self.model_metrics = []
         self.model_loss = None
@@ -59,7 +59,7 @@ class KaggleKernel:
         self.result_analyzer = None  # for analyze the result
 
         self._stage = KernelRunningState.INIT_DONE
-        self.logger = None
+        self.logger = logger
 
     def _add_logger_handler(self, handler):
         self.logger.addHandler(handler)
