@@ -4,6 +4,7 @@ from glob import glob
 import numpy as np
 import pandas as pd
 import pydicom
+from tqdm import tqdm
 
 import utils
 from kernel import KaggleKernel

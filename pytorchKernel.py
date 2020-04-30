@@ -81,6 +81,7 @@ class PS_torch(KaggleKernel):
         self.metric_logger.add_meter(
             "loss_mask", utils.SmoothedValue(window_size=160, fmt="{avg:.6f}")
         )
+        self.DATA_PATH_BASE = "/kaggle/input/siimacr-pneumothorax-segmentation-data-256"
 
     def analyze_data(self):
         pass
@@ -249,15 +250,14 @@ class PS_torch(KaggleKernel):
         return tuple(zip(*x))
 
     def prepare_train_dev_data(self):
-        df = pd.read_csv("../input/siim-dicom-images/train-rle.csv")
+        df = pd.read_csv(self.DATA_PATH_BASE + "/train-rle.csv")
         try:
             if self._debug_less_data:
-                df = pd.read_csv(
-                    "../input/siim-dicom-images/train-rle.csv")[:100]
+                df = pd.read_csv(self.DATA_PATH_BASE + "/train-rle.csv")[:100]
         except Exception:
             pass
 
-        imgdir = "../input/siim-png-images/input/train_png/"
+        imgdir = self.DATA_PATH_BASE + "/train/"
 
         self._stat_dataset = SIIMDataset_split_df(
             df, imgdir, no_aug=True
@@ -484,7 +484,7 @@ class PS_torch(KaggleKernel):
 
     def predict_on_test(self):
         sample_df = pd.read_csv(
-            "../input/siim-acr-pneumothorax-segmentation/sample_submission.csv"
+            os.path.join(self.DATA_PATH_BASE, "sample_submission.csv")
         )
 
         # this part was taken from @raddar's kernel: https://www.kaggle.com/raddar/better-sample-submission
@@ -505,7 +505,7 @@ class PS_torch(KaggleKernel):
             image_id = row["ImageId"]
             if image_id in masks_:
                 img_path = os.path.join(
-                    "../input/siim-png-images/input/test_png", image_id + ".png"
+                    self.DATA_PATH_BASE + "/test/" + image_id + ".png"
                 )
 
                 img = Image.open(img_path).convert("RGB")
