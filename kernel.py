@@ -158,9 +158,7 @@ class KaggleKernel:
         dump_flag=False,
     ):
         self.logger.debug(
-            "%s -> %s",
-            KernelRunningState.string(start_stage),
-            KernelRunningState.string(end_stage),
+            "%s -> %s", start_stage, end_stage,
         )
         if start_stage is not None:
             assert start_stage.value < end_stage.value
@@ -220,6 +218,7 @@ class KaggleKernel:
         if logger is not None:
             logger.debug(f"restore from {file_name}")
         self = utils.get_obj_or_dump(filename=file_name)
+        assert self is not None
         self.logger = logger
         return self
 

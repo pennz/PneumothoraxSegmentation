@@ -825,7 +825,7 @@ class PS_TF_DataHandler:
     def tf_serialize_example(f0, f1):
         print(PS_TF_DataHandler.serialize_PS_example(f0, f1))
         # the return type is
-        # <a href="../../../versions/r2.0/api_docs/python/tf#string">
+        # <a href="..../../versions/r2.0/api_docs/python/tf#string">
         # <code>tf.string</code></a>.
         tf_string = tf.py_function(
             PS_TF_DataHandler.serialize_PS_example,
