@@ -70,7 +70,7 @@ class KaggleKernel:
         logger = logging.getLogger(name)
         logger.setLevel(level)
         if handler is not None:
-            logger.addHandler(rabbit)
+            logger.addHandler(handler)
         self.logger = logger
 
     def set_random_seed(self):
@@ -208,7 +208,7 @@ class KaggleKernel:
         if stage is not None:
             file_name = f"run_state_{stage}.pkl"
         logger.debug(f"restore from {file_name}")
-        return get_obj_or_dump(filename=file_name)
+        return utils.get_obj_or_dump(filename=file_name)
 
     def load_state_data_only(self, file_name="run_state.pkl"):
         pass
