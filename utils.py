@@ -885,6 +885,34 @@ def dice_coef(y_true, y_pred, smooth=1, threshold=0.5):
     return (2.0 * intersection + smooth) / (K.sum(y_true_b) + K.sum(y_pred_b) + smooth)
 
 
+def mask2rle(img, width, height):
+    rle = []
+    lastColor = 0
+    currentPixel = 0
+    runStart = -1
+    runLength = 0
+
+    for x in range(width):
+        for y in range(height):
+            currentColor = img[x][y]
+            if currentColor != lastColor:
+                if currentColor == 255:
+                    runStart = currentPixel
+                    runLength = 1
+                else:
+                    rle.append(str(runStart))
+                    rle.append(str(runLength))
+                    runStart = -1
+                    runLength = 0
+                    currentPixel = 0
+            elif runStart > -1:
+                runLength += 1
+            lastColor = currentColor
+            currentPixel += 1
+
+    return " ".join(rle)
+
+
 def rle2mask(rle, width, height):
     mask = np.zeros(width * height)
     array = np.asarray([int(x) for x in rle.split()])

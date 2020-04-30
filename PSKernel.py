@@ -53,15 +53,16 @@ class PS(KaggleKernel):
                 else:
                     if type(mask_data) == str:
                         Y_train[n] = np.expand_dims(
-                            rle2mask(
-                                df.loc[_id_keystr, TARGET_COLUMN], 1024, 1024).T,
+                            utils.rle2mask(
+                                df.loc[_id_keystr, TARGET_COLUMN], 1024, 1024
+                            ).T,
                             axis=2,
                         )
                     else:
                         Y_train[n] = np.zeros((1024, 1024, 1))
                         for x in mask_data:
                             Y_train[n] = Y_train[n] + np.expand_dims(
-                                rle2mask(x, 1024, 1024).T, axis=2
+                                utils.rle2mask(x, 1024, 1024).T, axis=2
                             )
             except KeyError:
                 print(
