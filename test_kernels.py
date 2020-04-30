@@ -11,7 +11,6 @@ from IPython.core.debugger import set_trace
 from torch.autograd import Variable
 
 import kernel
-import modelTester
 
 # import modelTester
 import pytorchKernel
@@ -296,22 +295,22 @@ class TestPSKernel:
         ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
         assert os.path.isfile("train_dev.10.tfrec")
 
-    def test_tf_model_zoo(self):
-        t = modelTester.TF_model_zoo_tester()
-        t.run_logic()
+    # def test_tf_model_zoo(self):
+    #     t = modelTester.TF_model_zoo_tester()
+    #     t.run_logic()
 
-    def test_tf_model_zoo_model(self):
-        t = modelTester.TF_model_zoo_tester()
-        t.load_model()
-        assert t.model is not None
+    # def test_tf_model_zoo_model(self):
+    #     t = modelTester.TF_model_zoo_tester()
+    #     t.load_model()
+    #     assert t.model is not None
 
-    def test_tf_model_zoo_model(self):
-        t = modelTester.TF_model_zoo_tester()
-        t.set_model("mask_rcnn_resnet101_atrous_coco_2018_01_28")
-        t.run_prepare()
-        # t.check_graph()
-        t.run_test()  # result is great!!!
-        assert t.detection_graph is not None
+    # def test_tf_model_zoo_model(self):
+    #     t = modelTester.TF_model_zoo_tester()
+    #     t.set_model("mask_rcnn_resnet101_atrous_coco_2018_01_28")
+    #     t.run_prepare()
+    #     # t.check_graph()
+    #     t.run_test()  # result is great!!!
+    #     assert t.detection_graph is not None
 
     def test_analyze_RPN(self):
         assert False
