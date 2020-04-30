@@ -20,9 +20,6 @@ import runner
 import utils
 from kernel import KernelRunningState
 
-bar = logging.getLogger("bar")
-baz = logging.getLogger("baz")
-
 
 @pytest.fixture(scope="session")
 def args():
@@ -88,8 +85,8 @@ class TestPSKernel:
     # this function will run before every test. We re-initialize group in this
     # function. So for every test, new group is used.
     @classmethod
-    def setup_class(cls):
-        utils.logger.debug("Have a good day")
+    def setup_class(cls, mq_logger):
+        mq_logger.debug("Have a good day")
         importlib.reload(utils)
         importlib.reload(kernel)
         importlib.reload(pytorchKernel)
@@ -345,7 +342,7 @@ class TestPSKernel:
         assert k.img_mean is not None
 
 
-def test_call_remote_mq():
+def test_call_remote_mq(mq_logger):
     call_params = [
         "python",
         "main.py",
@@ -354,12 +351,12 @@ def test_call_remote_mq():
         "123",
         "intercept-resnet",
     ]
-    utils.logger.debug(" ".join(call_params))
+    mq_logger.debug(" ".join(call_params))
     ret = call(call_params)
     assert ret == 0
 
 
-def test_call_local():
+def test_call_local(mq_logger):
     call_params = [
         "python",
         "main.py",
@@ -368,7 +365,7 @@ def test_call_local():
         "123",
         "intercept-resnet",
     ]
-    utils.logger.debug(" ".join(call_params))
+    mq_logger.debug(" ".join(call_params))
     ret = call(call_params)
     assert ret == 0
 
