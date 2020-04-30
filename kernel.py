@@ -34,7 +34,10 @@ class KernelRunningState(Enum):
             "EVL_DEV_DONE",
             "SAVE_SUBMISSION_DONE",
         ]
-        return names[state_int_value]
+        if state_int_value is not None:
+            return names[state_int_value]
+        else:
+            return ""
 
 
 class KernelGroup:
@@ -125,11 +128,11 @@ class KaggleKernel:
         pass
 
     def dump_state(self, exec_flag=False):
-        self.logger.debug(f"state {self._stage}")
+        self.logger.debug("state %s" % self._stage)
         if exec_flag:
-            self.logger.debug(f"dumping state {self._stage}")
+            self.logger.debug("dumping state to file for %s" % self._stage)
             # dump_obj(self, 'run_state.pkl', force=True)  # too large
-            utils.dump_obj(self, f"run_state_{self._stage}.pkl", force=True)
+            utils.dump_obj(self, "run_state_%s.pkl" % self._stage, force=True)
 
     def run(
         self,
