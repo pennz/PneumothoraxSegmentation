@@ -220,7 +220,7 @@ class TestPSKernel:
 
     def _prepare_data(self):
         _stage = KernelRunningState.PREPARE_DATA_DONE
-        data_stage_file_name = f"run_state_{_stage}.pkl"
+        data_stage_file_name = "run_state_%s.pkl" % _stage
         if not os.path.isfile(data_stage_file_name):
             self.test_pytorch_starter_dump()
 
