@@ -249,16 +249,6 @@ class TestPytorchKernel:
         k.run(dump_flag=True)  # dump not working for torch
         assert k is not None
 
-    def test_pytorch_model_dev(self, mq_logger):
-        k = pytorchKernel.PS_torch(mq_logger)
-        # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
-        # dump_flag=True)  # will also analyze data
-        # k._debug_less_data = True
-        k.run(
-            end_stage=KernelRunningState.TRAINING_DONE, dump_flag=True
-        )  # dump not working for torch
-        assert k is not None
-
     def test_pytorch_show_model_detail(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
         k._build_show_model_detail()  # not work
@@ -290,10 +280,10 @@ class TestPytorchKernel:
 
     def test_pytorch_cv_data_prepare(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
-        k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True)
+        k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
-        k2 = pytorchKernel.PS_torch(mq_logger)
-        k2.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
+        # k2 = pytorchKernel.PS_torch(mq_logger)
+        # k2.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
         l = len(k.data_loader)
         l_dev = len(k.data_loader_dev)
@@ -347,6 +337,7 @@ class TestPytorchKernel:
 
         assert (grads[2][0, 1] / grads[1][0, 1]) == (1 - alpha_for_pos) / 0.5
 
+    @pytest.mark.skip("won't work for pytorch")
     def _pytorch_starter_dump(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
         k.run(
@@ -357,12 +348,14 @@ class TestPytorchKernel:
         # kernel_load_back.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
+    @pytest.mark.skip("won't work for pytorch")
     def test_pytorch_starter_load(self, mq_logger):
         kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back.load_model_weight()
 
+    @pytest.mark.skip("won't work for pytorch")
     def test_pytorch_starter_load_continue_train(self, mq_logger):
         kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
@@ -371,6 +364,7 @@ class TestPytorchKernel:
         kernel_load_back.load_model_weight_continue_train()
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
+    @pytest.mark.skip("won't work for pytorch")
     def test_pytorch_starter_load_then_submit(self, mq_logger):
         kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
