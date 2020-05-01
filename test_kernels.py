@@ -143,7 +143,7 @@ class TestPSKernel:
     def test_prepare_data(self, mq_logger):
         ps_kernel = PSKernel.PS(mq_logger)
         ps_kernel.run(
-            end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
+            end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=False
         )  # will also analyze data
         assert ps_kernel.train_X is not None
         assert len(ps_kernel.train_X) == len(ps_kernel.train_Y)
@@ -246,7 +246,7 @@ class TestPytorchKernel:
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
         k.submit_run = True
-        k.run(dump_flag=True)  # dump not working for torch
+        k.run(dump_flag=False)  # dump not working for torch
         assert k is not None
 
     def test_pytorch_show_model_detail(self, mq_logger):
@@ -360,7 +360,8 @@ class TestPytorchKernel:
         kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
-        kernel_load_back._debug_continue_training = True
+        # kernel_load_back._debug_continue_training = True
+        kernel_load_back._debug_continue_training = False
         kernel_load_back.load_model_weight_continue_train()
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
