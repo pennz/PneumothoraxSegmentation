@@ -362,7 +362,7 @@ class PS_torch(KaggleKernel):
 
         # GPU
         self.model_ft.to(self.device)
-        self.logger.debug(f"model info:\n{self.model_ft}")
+        #  self.logger.debug(f"model info:\n{self.model_ft}")
 
         # for param in self.model_ft.parameters():
         #    param.requires_grad = True
