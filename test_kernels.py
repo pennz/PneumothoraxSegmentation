@@ -184,7 +184,7 @@ class TestPSKernel:
 
     #    self.assertTrue(os.path.isfile('train.tfrec'))
     def test_data_aug(self, mq_logger):
-        self._prepare_data()
+        self._prepare_data(mq_logger)
 
         k = pytorchKernel.PS_torch(mq_logger)
         k.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
@@ -218,14 +218,14 @@ class TestPSKernel:
         k = pytorchKernel.PS_torch(mq_logger)
         k._build_show_model_detail()  # not work
 
-    def _prepare_data(self):
+    def _prepare_data(self, mq_logger):
         _stage = KernelRunningState.PREPARE_DATA_DONE
         data_stage_file_name = "run_state_%s.pkl" % _stage
         if not os.path.isfile(data_stage_file_name):
-            self.test_pytorch_starter_dump()
+            self._pytorch_starter_dump(mq_logger)
 
     def test_FL_in_model_early_stop(self, mq_logger):
-        self._prepare_data()
+        self._prepare_data(mq_logger)
         kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
         kernel_load_back.load_state_data_only(
@@ -302,7 +302,7 @@ class TestPSKernel:
 
         assert (grads[2][0, 1] / grads[1][0, 1]) == (1 - alpha_for_pos) / 0.5
 
-    def test_pytorch_starter_dump(self, mq_logger):
+    def _pytorch_starter_dump(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
         k.run(
             end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True
