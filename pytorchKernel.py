@@ -362,6 +362,7 @@ class PS_torch(KaggleKernel):
 
         # GPU
         self.model_ft.to(self.device)
+        self.logger.debug(f'model info:\n{self.model_ft}')
 
         # for param in self.model_ft.parameters():
         #    param.requires_grad = True
@@ -371,7 +372,7 @@ class PS_torch(KaggleKernel):
         start_learning_rate = 0.001
 
         try:
-            if self._debug_continue_training:
+            if self._debug_continue_training:  # monkey patch
                 start_learning_rate = 0.00001
         except Exception:
             pass
