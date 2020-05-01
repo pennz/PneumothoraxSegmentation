@@ -175,6 +175,11 @@ class TestPSKernel:
         # end_stage=KernelRunningState.TRAINING_DONE)
         assert k.ds is not None
 
+    def test_convert_tf_from_start(self, mq_logger):  # won't work
+        ps_kernel = PS(mq_logger)
+        ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
+        assert os.path.isfile("train_dev.10.tfrec")
+
     # def test_convert_tf(self, mq_logger):
     #    kernel_withdata
     #    = kernel.KaggleKernel._load_state(KernelRunningState.PREPARE_DATA_DONE)
@@ -183,7 +188,7 @@ class TestPSKernel:
     #    k.after_prepare_data_hook()
 
     #    self.assertTrue(os.path.isfile('train.tfrec'))
-    def test_data_aug(self, mq_logger):
+    def test_pytorch_data_aug(self, mq_logger):
         self._prepare_data(mq_logger)
 
         k = pytorchKernel.PS_torch(mq_logger)
@@ -214,7 +219,7 @@ class TestPSKernel:
         )  # dump not working for torch
         assert k is not None
 
-    def test_torch_show_model_detail(self, mq_logger):
+    def test_pytorch_show_model_detail(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
         k._build_show_model_detail()  # not work
 
@@ -224,7 +229,7 @@ class TestPSKernel:
         if not os.path.isfile(data_stage_file_name):
             self._pytorch_starter_dump(mq_logger)
 
-    def test_FL_in_model_early_stop(self, mq_logger):
+    def test_pytorch_FL_in_model_early_stop(self, mq_logger):
         self._prepare_data(mq_logger)
         kernel_load_back = pytorchKernel.PS_torch(mq_logger)
 
@@ -233,7 +238,7 @@ class TestPSKernel:
         kernel_load_back.build_and_set_model()
         kernel_load_back.train_model()
 
-    def test_cv_train_dev(self, mq_logger):
+    def test_pytorch_cv_train_dev(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
 
         k._debug_less_data = True
@@ -243,7 +248,7 @@ class TestPSKernel:
         k.num_epochs = 10
         k.train_model()
 
-    def test_cv_data_prepare(self, mq_logger):
+    def test_pytorch_cv_data_prepare(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
         k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE, dump_flag=True)
 
@@ -257,7 +262,7 @@ class TestPSKernel:
         assert ratio > 3.5  # around 0.8/0.2
         assert ratio < 4.5
 
-    def test_focal_loss_func(self, mq_logger):
+    def test_pytorch_focal_loss_func(self, mq_logger):
         inputs = torch.tensor(
             [
                 [0.0, 0.2, 0.4, 0.0, 0.2, 0.4, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
@@ -334,11 +339,6 @@ class TestPSKernel:
         kernel_load_back.run()
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
-    def test_convert_tf_from_start(self, mq_logger):  # won't work
-        ps_kernel = PS(mq_logger)
-        ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
-        assert os.path.isfile("train_dev.10.tfrec")
-
     # def test_tf_model_zoo(self, mq_logger):
     #     t = modelTester.TF_model_zoo_tester()
     #     t.run_logic()
@@ -374,7 +374,7 @@ class TestPSKernel:
     def test_L_loss(self, mq_logger):
         assert False
 
-    def test_dataset_mean_std(self, mq_logger):
+    def test_pytorch_dataset_mean_std(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
