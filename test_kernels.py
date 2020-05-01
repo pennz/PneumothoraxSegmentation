@@ -136,7 +136,7 @@ class TestPSKernel:
 
     def test_class(self, mq_logger):
         ps_kernel = PS(mq_logger)
-        set_trace()
+        # set_trace()
         assert len(ps_kernel.model_metrics) == 0
 
     def test_prepare_data(self, mq_logger):
