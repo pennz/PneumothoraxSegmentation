@@ -237,10 +237,10 @@ class TestPytorchKernel:
         # k.load_state_data_only(KernelRunningState.PREPARE_DATA_DONE)
         # k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE,
         # dump_flag=True)  # will also analyze data
-        k.data_loader.dataset._test_(1019)
-        k.data_loader.dataset._test_(2019)
+        k.data_loader.dataset._test_(1)
+        k.data_loader.dataset._test_(2)  # test should choose small idx, as
+        # batch might be small
         # k.run()  # dump not working for torch
-
         assert k is not None
 
     def _prepare_data(self, mq_logger):
