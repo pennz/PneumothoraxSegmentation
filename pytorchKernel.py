@@ -6,6 +6,7 @@ import gc
 import os
 import random
 import types  # for bound new forward function for RoIHeads
+import functools
 
 import numpy as np
 import pandas as pd
@@ -338,8 +339,8 @@ class PS_torch(KaggleKernel):
         FL = FocalLoss(
             gamma=0.5, alpha=0.5, magnifier=1
         )  # changed lr decay 2/0.15 + patience=3, do not use focal loss...
-        # FL_wrapped = functools.partial(maskrcnn_loss_focal, focal_loss_func=FL)
-        FL_wrapped = None  # changed lr decay 2/0.15, do not use focal loss... 0.8025
+        FL_wrapped = functools.partial(maskrcnn_loss_focal, focal_loss_func=FL)
+        # FL_wrapped = None  # changed lr decay 2/0.15, do not use focal loss... 0.8025
 
         RoIHeads_loss_customized.set_customized_loss(
             self.model_ft.roi_heads, maskrcnn_loss_customized=FL_wrapped
