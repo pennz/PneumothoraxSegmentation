@@ -603,11 +603,17 @@ class SIIMDataset(torch.utils.data.Dataset):
         )  # pay attention need after mask.T
         mask = np.expand_dims(mask, axis=0)
 
-        pos = np.where(np.array(mask)[0, :, :])
-        xmin = np.min(pos[1])
-        xmax = np.max(pos[1])
-        ymin = np.min(pos[0])
-        ymax = np.max(pos[0])
+        if sum(mask.flatten()) == 0:
+            xmax = 0
+            xmin = 0
+            ymax = 0
+            ymin = 0
+        else:
+            pos = np.where(np.array(mask)[0, :, :])
+            xmin = np.min(pos[1])
+            xmax = np.max(pos[1])
+            ymin = np.min(pos[0])
+            ymax = np.max(pos[0])
 
         boxes = torch.as_tensor(
             [[xmin, ymin, xmax, ymax]], dtype=torch.float32)
@@ -904,7 +910,7 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
 
             losses.update(loss_mask)
 
-        if self.has_keypoint:
+        if self.has_keypoint():
             keypoint_proposals = [p["boxes"] for p in result]
             if self.training:
                 # during training, only focus on positive boxes

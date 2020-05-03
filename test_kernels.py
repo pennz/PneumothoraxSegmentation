@@ -266,7 +266,7 @@ class TestPytorchKernel:
         k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
         k.build_and_set_model()
-        k.num_epochs = 10
+        k.num_epochs = 1
         k.train_model()
 
     def test_pytorch_cv_data_prepare(self, mq_logger):
