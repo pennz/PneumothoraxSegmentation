@@ -7,6 +7,8 @@ import os
 import random
 import types  # for bound new forward function for RoIHeads
 import functools
+import pdb
+import pysnooper
 
 import numpy as np
 import pandas as pd
@@ -831,6 +833,7 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
         head.forward = types.MethodType(RoIHeads_loss_customized.forward, head)
 
     # def forward(self, features, proposals, image_shapes, targets=None):
+    @pysnooper.snoop()
     def forward(self, features, proposals, image_shapes, targets=None):
         """
         Arguments:
@@ -896,6 +899,7 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
             mask_logits = self.mask_predictor(mask_features)
 
             loss_mask = {}
+            pdb.set_trace()
             if self.training:
                 gt_masks = [t["masks"] for t in targets]
                 gt_labels = [t["labels"] for t in targets]
