@@ -137,7 +137,7 @@ class PS(KaggleKernel):
         train_data_wildcard = self.DATA_PATH_BASE + "/dicom-images-train/*/*/*.dcm"
 
         if self.developing:
-            train_fns = sorted(glob(train_data_wildcard))
+            train_fns = sorted(glob(train_data_wildcard))[:100]
         else:
             train_fns = sorted(glob(train_data_wildcard))
 
@@ -287,7 +287,7 @@ class PS(KaggleKernel):
     def prepare_test_data(self):
         test_data_wildcard = self.DATA_PATH_BASE + "/dicom-images-test/*/*/*.dcm"
         if self.developing:
-            test_fns = sorted(glob(test_data_wildcard))
+            test_fns = sorted(glob(test_data_wildcard))[:100]
         else:
             test_fns = sorted(glob(test_data_wildcard))
         self.logger.debug(f"test counts: {len(test_fns)}")
