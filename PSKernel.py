@@ -33,7 +33,7 @@ class PS(KaggleKernel):
         self._PS_init_()
 
     def _PS_init_(self):
-        self.use_tf_data = True
+        self.use_tf_data = False
         self.developing = True
         # self.train_dev_mask = None  # for train dev split
         self.DATA_PATH_BASE = "../input/siim-train-test"
