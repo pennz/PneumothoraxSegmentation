@@ -51,6 +51,7 @@ class PS(KaggleKernel):
         pass
 
     @staticmethod
+    @pysnooper.snoop()
     def _PS_data_preprocess_np(fns, df, TARGET_COLUMN, im_height, im_width, im_chan):
         X_train = np.zeros(
             (len(fns), im_height, im_width, im_chan), dtype=np.uint8)
