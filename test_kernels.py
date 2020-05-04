@@ -140,6 +140,7 @@ class TestPSKernel:
         # set_trace()
         assert len(ps_kernel.model_metrics) == 0
 
+    @pytest.mark.skip("take too long to test, just skip")
     def test_prepare_data(self, mq_logger):
         ps_kernel = PSKernel.PS(mq_logger)
         ps_kernel.run(
@@ -151,6 +152,7 @@ class TestPSKernel:
         assert ps_kernel.dev_X is not None
         assert len(ps_kernel.dev_X) == len(ps_kernel.dev_Y)
 
+    @pytest.mark.skip("take too long to test, just skip")
     def test_dump_load_continue(self, mq_logger):
         ps_kernel = PSKernel.PS(mq_logger)
         ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
@@ -162,11 +164,12 @@ class TestPSKernel:
         assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
     def test_train(self, mq_logger):
-        kernel_load_back = kernel.KaggleKernel._load_state(
-            KernelRunningState.PREPARE_DATA_DONE, logger=mq_logger
-        )
-        kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
-        assert kernel_load_back.model is not None
+        # kernel_load_back = kernel.KaggleKernel._load_state(
+        #     KernelRunningState.PREPARE_DATA_DONE, logger=mq_logger
+        # )
+        ps_kernel = PSKernel.PS(mq_logger)
+        ps_kernel.run(end_stage=KernelRunningState.TRAINING_DONE)
+        assert ps_kernel.model is not None
 
     @pytest.mark.skip("take too long to test, just skip")
     def test_read_tf(self, mq_logger):
@@ -269,6 +272,7 @@ class TestPytorchKernel:
         k.num_epochs = 1
         k.train_model()
 
+    @pytest.mark.skip()
     def test_pytorch_cv_train_more(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
 
@@ -356,14 +360,13 @@ class TestPytorchKernel:
         kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
         kernel_load_back.load_model_weight()
 
-    @pytest.mark.skip("won't work for pytorch")
-    def test_pytorch_starter_load_continue_train(self, mq_logger):
-        kernel_load_back = pytorchKernel.PS_torch(mq_logger)
+    def test_pytorch_starter_load_than_train(self, mq_logger):
+        k = pytorchKernel.PS_torch(mq_logger)
 
-        kernel_load_back.load_state_data_only(KernelRunningState.TRAINING_DONE)
-        # kernel_load_back._debug_continue_training = True
-        kernel_load_back._debug_continue_training = False
-        kernel_load_back.load_model_weight_continue_train()
+        # will also analyze data
+        k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
+        # k._debug_continue_training = True
+        k.load_model_weight_continue_train()
         # kernel_load_back.run(end_stage=KernelRunningState.TRAINING_DONE)
 
     @pytest.mark.skip("won't work for pytorch")

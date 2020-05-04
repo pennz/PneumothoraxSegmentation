@@ -2,17 +2,17 @@ from __future__ import print_function
 
 import collections
 import errno
+import functools
 import gc
 import os
+import pdb
 import random
 import types  # for bound new forward function for RoIHeads
-import functools
-import pdb
-import pysnooper
 
 import numpy as np
 import pandas as pd
 import pydicom
+import pysnooper
 import torch
 import torch.distributed as dist
 import torch.nn as nn
