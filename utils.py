@@ -24,6 +24,7 @@ from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from tqdm import tqdm
+import pydicom
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
