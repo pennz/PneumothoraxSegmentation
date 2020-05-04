@@ -6,6 +6,7 @@ from glob import glob
 import numpy as np
 import pandas as pd
 import pydicom
+import pysnooper
 import tensorflow
 from matplotlib import pyplot as plt
 from sklearn.model_selection import KFold
@@ -91,6 +92,7 @@ class PS(KaggleKernel):
         return X_train, Y_train
 
     @staticmethod
+    @pysnooper.snoop()
     def _PS_data_preprocess(fns, df, tf=False):
         """
         for tf=True, need to use TF2.0
