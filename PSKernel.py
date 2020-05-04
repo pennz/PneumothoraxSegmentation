@@ -134,11 +134,16 @@ class PS(KaggleKernel):
     def prepare_train_dev_data(self):
         self._prepare_train_data_as_np()
 
+    def _get_train_data(self):
+        train_data_wildcard = self.DATA_PATH_BASE + "/dicom-images-train/*/*/*.dcm"
+        if self.developing:
+            train_fns = sorted(glob(train_data_wildcard))[:100]
+        else:
+            train_fns = sorted(glob(train_data_wildcard))
+        return train_fns
+
     # just prepare train/dev here together
     def _prepare_train_data_as_tf(self):
-        # getting path of all the train and test images
-        train_data_wildcard = self.DATA_PATH_BASE + "/dicom-images-train/*/*/*.dcm"
-
         train_fns = self._get_train_data()
 
         self.logger.debug(f"train & dev counts: {len(train_fns)}")
@@ -147,17 +152,9 @@ class PS(KaggleKernel):
         )
         self.ds = PS._PS_data_preprocess(train_fns, df_full, tf=True)
 
-    def _get_train_data(self):
-        if self.developing:
-            train_fns = sorted(glob(train_data_wildcard))[:100]
-        else:
-            train_fns = sorted(glob(train_data_wildcard))
-        return train_fns
-
     # just prepare train/dev here together
     def _prepare_train_data_as_np(self):
         # getting path of all the train and test images
-        train_data_wildcard = self.DATA_PATH_BASE + "/dicom-images-train/*/*/*.dcm"
 
         train_fns = self._get_train_data()
 
