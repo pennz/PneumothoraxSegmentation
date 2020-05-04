@@ -51,7 +51,6 @@ class PS(KaggleKernel):
         pass
 
     @staticmethod
-    @pysnooper.snoop()
     def _PS_data_preprocess_np(fns, df, TARGET_COLUMN, im_height, im_width, im_chan):
         X_train = np.zeros(
             (len(fns), im_height, im_width, im_chan), dtype=np.uint8)
@@ -93,7 +92,6 @@ class PS(KaggleKernel):
         return X_train, Y_train
 
     @staticmethod
-    @pysnooper.snoop()
     def _PS_data_preprocess(fns, df, tf=False):
         """
         for tf=True, need to use TF2.0
@@ -296,7 +294,7 @@ class PS(KaggleKernel):
             test_fns = sorted(glob(test_data_wildcard))
         self.logger.debug(f"test counts: {len(test_fns)}")
 
-    def _build_model(input_layer, start_neurons):
+    def _build_model(self, input_layer, start_neurons):
         # ref: https://www.kaggle.com/phoenigs/u-net-dropout-augmentation-stratification
         # 128 -> 64
         conv1 = Conv2D(start_neurons * 1, (3, 3), activation="relu", padding="same")(
