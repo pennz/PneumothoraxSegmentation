@@ -1,6 +1,7 @@
 import gc
 import math
 import os
+import pdb
 from glob import glob
 
 import numpy as np
@@ -32,6 +33,7 @@ class PS(KaggleKernel):
         self._PS_init_()
 
     def _PS_init_(self):
+        self.use_tf_data = True
         self.developing = True
         # self.train_dev_mask = None  # for train dev split
         self.DATA_PATH_BASE = "../input/siim-train-test"
@@ -130,7 +132,11 @@ class PS(KaggleKernel):
         return imgs
 
     def prepare_train_dev_data(self):
-        self._prepare_train_data_as_np()
+        pdb.set_trace()
+        if self.use_tf_data:
+            self._prepare_train_data_as_tf()
+        else:
+            self._prepare_train_data_as_np()
 
     def _get_train_data(self):
         train_data_wildcard = self.DATA_PATH_BASE + "/dicom-images-train/*/*/*.dcm"
