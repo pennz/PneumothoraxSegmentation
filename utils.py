@@ -9,6 +9,7 @@ from glob import glob
 
 import numpy as np
 import pandas as pd
+import pydicom
 import tensorflow as tf
 import tensorflow.keras.backend as K
 import torch
@@ -24,7 +25,6 @@ from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from tqdm import tqdm
-import pydicom
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -478,6 +478,8 @@ class PS_TF_DataHandler:
             print("Getting train images and masks ... ")
             _id = path
             # sys.stdout.flush()
+            # FIXME it cannot be put to autograph!!!
+            raise RuntimeError("Pydicom read cannot be put to autograph!!!")
             dataset = pydicom.read_file(_id)
             _id_keystr = _id.split("/")[-1][:-4]
             X_train = np.expand_dims(dataset.pixel_array, axis=2)
