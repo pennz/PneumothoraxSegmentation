@@ -1,0 +1,22 @@
+{
+  "id": "k1gaggle/hypercolumns-pneumothorax-fastai-0-818-lb",
+  "id_no": 4713196,
+  "title": "Hypercolumns pneumothorax fastai [0.818 LB]",
+  "code_file": "hypercolumns-pneumothorax-fastai-0-819-lb.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "keywords": [],
+  "dataset_sources": [
+    "pytorch/resnet34",
+    "seesee/siim-train-test",
+    "iafoss/siimacr-pneumothorax-segmentation-data-256",
+    "iafoss/siimacr-pneumothorax-segmentation-data-128"
+  ],
+  "kernel_sources": [],
+  "competition_sources": [
+    "siim-acr-pneumothorax-segmentation"
+  ]
+}
