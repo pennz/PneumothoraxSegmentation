@@ -267,10 +267,14 @@ class TestPytorchKernel:
 
         k._debug_less_data = True
         k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
+        k.logger.debug("data done")
 
         k.build_and_set_model()
         k.num_epochs = 1
+        k.logger.debug("start train one epoch")
         k.train_model()
+        k.logger.debug("end train one epoch")
+        assert True
 
     @pytest.mark.skip()
     def test_pytorch_cv_train_more(self, mq_logger):
