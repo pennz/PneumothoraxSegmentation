@@ -88,8 +88,8 @@ class PS_torch(KaggleKernel):
     def analyze_data(self):
         pass
 
-    def dump_state(self, exec_flag=False):  # only dataloader will be dumpped
-        utils.logger.debug(f"state {self._stage}")
+    def dump_state(self, exec_flag=False, force=True):  # only dataloader ... others cannot dumped
+        utils.logger.debug(f'state {self._stage}')
         if exec_flag:
             utils.logger.debug(f"dumping state {self._stage}")
             self_data = vars(self)
@@ -107,8 +107,7 @@ class PS_torch(KaggleKernel):
                 k: v for k, v in self_data.items() if k not in names_to_exclude
             }
 
-            utils.dump_obj(
-                data_to_save, f"run_state_{self._stage}.pkl", force=True)
+            utils.dump_obj(data_to_save, f'run_state_{self._stage}.pkl', force=force)
 
             # print(self_data)
             # for k, v in self_data.items():
@@ -131,14 +130,19 @@ class PS_torch(KaggleKernel):
         # self.lr_scheduler = self_data['lr_scheduler']
 
     @staticmethod
-    def eval_model_loss(model, data_loader, device, metric_logger, print_freq):
-        # metric_logger = utils.MetricLogger(delimiter="  ")
-        header = "Evaluation"
-        losses_summed = 0.0
+    def eval_model_loss(model, data_loader, device, metric_logger, print_freq, mode='train'):
+        #metric_logger = utils.MetricLogger(delimiter="  ")
+        header = 'Evaluation'
+        losses_summed = 0.
         cnt = 0
         metric_logger.clear()
 
         # model.eval() # will output box, seg, scores
+        if mode == 'train':
+            model.train()
+        else:
+            model.eval()  # will output box, seg, scores
+
         with torch.no_grad():
             for images, targets in metric_logger.log_every(
                 data_loader, print_freq, header
@@ -147,6 +151,9 @@ class PS_torch(KaggleKernel):
                 targets = [{k: v.to(device) for k, v in t.items()}
                            for t in targets]
 
+                if mode != 'train':
+                    predictions, _ = model(images, targets)
+                    continue
                 loss_dict = model(images, targets)
                 loss_dict.pop("loss_rpn_box_reg")
                 # diferrent model use different names
@@ -162,7 +169,9 @@ class PS_torch(KaggleKernel):
                 metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
 
         metric_logger.clear()
-        return losses_summed / cnt
+        if mode != 'train':
+            return predictions
+        return losses_summed/cnt
 
     @staticmethod
     def eval_model(model, data_loader, device, metric_logger, print_freq):
@@ -270,9 +279,8 @@ class PS_torch(KaggleKernel):
 
         imgdir = self.DATA_PATH_BASE + "/train/"
 
-        self._stat_dataset = SIIMDataset_split_df(
-            df, imgdir, no_aug=True
-        )  # for mean calculation
+        if self.img_mean is None or self.img_std is None:
+            self._stat_dataset = SIIMDataset_split_df(df, imgdir, no_aug=True)  # for mean calculation
 
         if self.submit_run:
             df_train = df
@@ -289,12 +297,8 @@ class PS_torch(KaggleKernel):
 
             dataset_dev = SIIMDataset_split_df(df_dev, imgdir, no_aug=True)
             self.data_loader_dev = torch.utils.data.DataLoader(
-                dataset_dev,
-                batch_size=4,
-                shuffle=True,
-                num_workers=4,  # 4: 08:19, 8: 08:40
-                collate_fn=self._collate_fn_for_data_loader,
-            )
+                dataset_dev, batch_size=4, shuffle=False, num_workers=4,  # 4: 08:19, 8: 08:40
+                collate_fn=self._collate_fn_for_data_loader)
 
         dataset_train = SIIMDataset_split_df(df_train, imgdir)
         # print(dataset_train[2019][1]['area'])  # only for debug
@@ -353,9 +357,7 @@ class PS_torch(KaggleKernel):
         FL_wrapped = functools.partial(maskrcnn_loss_focal, focal_loss_func=FL)
         # FL_wrapped = None  # changed lr decay 2/0.15, do not use focal loss... 0.8025
 
-        RoIHeads_loss_customized.set_customized_loss(
-            self.model_ft.roi_heads, maskrcnn_loss_customized=FL_wrapped
-        )
+        RoIHeads_loss_customized.set_customized_loss(self.model_ft.roi_heads, maskrcnn_loss_customized=FL_wrapped)
         RoIHeads_loss_customized.update_forward_func(self.model_ft.roi_heads)
 
         # get number of input features for the classifier
@@ -373,6 +375,7 @@ class PS_torch(KaggleKernel):
         )
 
         # GPU
+        set_trace()  # test about to
         self.model_ft.to(self.device)
         #  self.logger.debug(f"model info:\n{self.model_ft}")
 
@@ -498,6 +501,103 @@ class PS_torch(KaggleKernel):
 
         self.model_ft.eval()
 
+    def predict_rle_from_acts_with_threshold(self, acts, threshold):
+        return self.predict_rle_from_acts(acts, self.data_loader_dev, self.metric_logger, 100, threshold)
+
+    @staticmethod
+    def predict_rle_from_acts(acts, data_loader, metric_logger, print_freq, threshold=0.5):
+        header = 'DEV prediction test'
+
+        sublist = []
+        counter = 0
+
+        data_loader_b1 = torch.utils.data.DataLoader(
+            data_loader.dataset, batch_size=1, shuffle=False, num_workers=0,  # 4: 08:19, 8: 08:40
+            collate_fn=PS_torch._collate_fn_for_data_loader)
+
+        idx = 0
+        mask_add_cnt = []
+        for image, target in metric_logger.log_every(data_loader_b1, print_freq, header):
+            width, height = 1024, 1024
+
+            result = acts[idx]
+            image_id = target[0]['image_id'].cpu().numpy()
+            idx += 1
+            if len(result["masks"]) > 0:
+                counter += 1
+                mask_added = 0
+                for ppx in range(len(result["masks"])):
+                    if result["scores"][ppx] >= threshold:
+                        mask_added += 1
+                        #res = transforms.ToPILImage()(result["masks"][ppx].permute(1, 2, 0).cpu().numpy())
+                        res = transforms.ToPILImage()(result["masks"][ppx].transpose((1, 2, 0)))
+                        res = np.asarray(res.resize((width, height), resample=Image.BILINEAR))
+                        res = (res[:, :] * 255. > 127).astype(np.uint8).T
+                        rle = utils.mask_to_rle(res, width, height)
+                        sublist.append([image_id, rle])
+                if mask_added == 0:
+                    rle = " -1"
+                    sublist.append([image_id, rle])
+                mask_add_cnt.append(mask_added)
+            else:
+                rle = " -1"
+                sublist.append([image_id, rle])
+                mask_add_cnt.append(0)  # no mask
+            if idx % 100 == 0:
+                mask_stat = np.array(mask_add_cnt)
+                metric_logger.update(**{'mask0':((mask_stat==0).sum()/idx),
+                                        'mask1':((mask_stat==1).sum()/idx),
+                                        'mask2':((mask_stat==2).sum()/idx),
+                                        'mask>2':((mask_stat>2).sum()/idx)})
+
+        mask_stat = np.array(mask_add_cnt)
+        assert len(mask_stat) == idx
+
+        metric_logger.print_and_log_to_file(
+            f'image cnt: {idx}, image predicted mask cnt: {counter}, '
+            f'mask 0,1,2,3+ {(mask_stat==0).sum()/idx}, '
+            f'{(mask_stat==1).sum()/idx}, {(mask_stat==2).sum()/idx}, {(mask_stat>2).sum()/idx}')
+
+        return sublist, mask_stat
+
+    @staticmethod
+    def predict_rle(model, device, data_loader, metric_logger, print_freq):
+        header = 'DEV prediction test'
+
+        sublist = []
+        counter = 0
+        threshold = 0.55  # changed from 0.25 to 0.5... need to check the data and analyze...(test on dev set)
+        assert data_loader.batch_size == 1
+
+        for images, targets in metric_logger.log_every(data_loader, print_freq, header):
+            width, height = images.size
+            image_id = targets['image_id']
+
+            images = list(image.to(device) for image in images)
+            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
+            result = model(images, targets)[0]
+
+            if len(result["masks"]) > 0:
+                counter += 1
+                mask_added = 0
+                for ppx in range(len(result["masks"])):
+                    if result["scores"][ppx] >= threshold:
+                        mask_added += 1
+                        res = transforms.ToPILImage()(result["masks"][ppx].permute(1, 2, 0).cpu().numpy())
+                        res = np.asarray(res.resize((width, height), resample=Image.BILINEAR))
+                        res = (res[:, :] * 255. > 127).astype(np.uint8).T
+                        rle = utils.mask_to_rle(res, width, height)
+                        sublist.append([image_id, rle])
+                if mask_added == 0:
+                    rle = " -1"
+                    sublist.append([image_id, rle])
+            else:
+                rle = " -1"
+                sublist.append([image_id, rle])
+
+        return sublist
+
     def predict_on_test(self):
         sample_df = pd.read_csv(
             os.path.join(self.DATA_PATH_BASE, "sample_submission.csv")
@@ -565,6 +665,34 @@ class PS_torch(KaggleKernel):
         self.build_and_set_model()
         # self.pre_test()
         # summary(self.model_ft, (1,1024,1024))
+
+    def check_predict_details(self):
+        # Thanks https://discuss.pytorch.org/t/how-can-l-load-my-best-model-as-a-feature-extractor-evaluator/17254/6
+        assert self.model_ft is not None
+        activations = utils.get_obj_or_dump('dev_output_results.pkl')
+        self.analyzer = TorchModelAnalyzer(self)
+        analyzer = self.analyzer
+
+        if activations is not None:
+            self.analyzer.activation = activations
+        else:
+            analyzer.register_forward_hook(self.model_ft.roi_heads, analyzer.get_output_saved('roi_heads'))
+            # for mask_head output, size torch.Size([40, 256, 14, 14]),
+            #(mask_fcn4): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            #(relu4): ReLU(inplace)
+            # for mask_predictor, torch.Size([46, 2, 28, 28])  (in evaluate mode)
+            # for roi_heads, output.shape, tuple length 2, ([{'boxes', 'labels', 'scores':torch.Size([7]), 'masks':torch.Size([7, 1, 28, 28])},T,T,T],[ PLACE_FOR_LOSSES ])
+            # for roi_heads, in training mode, output different number of test result, according to threshold thing
+
+            self.eval_model_loss(self.model_ft, self.data_loader_dev, self.device, self.metric_logger, print_freq=150)
+            utils.dump_obj(analyzer.activation, 'dev_output_results.pkl', force=True)
+
+        roi_acts = []
+        for acts in analyzer.activation['roi_heads']:
+            roi_acts += acts[0]
+        self.analyzer.test_out_threshold(roi_acts)
+        set_trace()
+
 
 
 class SIIMDataset(torch.utils.data.Dataset):
@@ -841,7 +969,7 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
 
     @staticmethod
     def update_forward_func(head):
-        head.forward = types.MethodType(RoIHeads_loss_customized.forward, head)
+        head.forward = types.MethodType(RoIHeads_loss_customized.forward, head)  # bound the method to our head
 
     # def forward(self, features, proposals, image_shapes, targets=None):
     def forward(self, features, proposals, image_shapes, targets=None):
@@ -855,6 +983,13 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
         maskrcnn_loss_func = maskrcnn_loss
         fastrcnn_loss_func = fastrcnn_loss
         keypointrcnn_loss_func = keypointrcnn_loss
+
+        eval_when_train = not self.training
+        try:
+            if self._eval_when_train:
+                eval_when_train = True
+        except AttributeError:
+            pass
 
         if self.maskrcnn_loss_customized is not None:
             maskrcnn_loss_func = self.maskrcnn_loss_customized
@@ -878,14 +1013,10 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
         result, losses = [], {}
         if self.training:
             loss_classifier, loss_box_reg = fastrcnn_loss_func(
-                class_logits, box_regression, labels, regression_targets
-            )
-            losses = dict(loss_classifier=loss_classifier,
-                          loss_box_reg=loss_box_reg)
-        else:
-            boxes, scores, labels = self.postprocess_detections(
-                class_logits, box_regression, proposals, image_shapes
-            )
+                class_logits, box_regression, labels, regression_targets)
+            losses = dict(loss_classifier=loss_classifier, loss_box_reg=loss_box_reg)
+        if eval_when_train:
+            boxes, scores, labels = self.postprocess_detections(class_logits, box_regression, proposals, image_shapes)
             num_images = len(boxes)
             for i in range(num_images):
                 result.append(
@@ -916,7 +1047,7 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
                     mask_logits, mask_proposals, gt_masks, gt_labels, pos_matched_idxs
                 )
                 loss_mask = dict(loss_mask=loss_mask)
-            else:
+            if eval_when_train:
                 labels = [r["labels"] for r in result]
                 masks_probs = maskrcnn_inference(mask_logits, labels)
                 for mask_prob, r in zip(masks_probs, result):
@@ -949,10 +1080,8 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
                     keypoint_logits, keypoint_proposals, gt_keypoints, pos_matched_idxs
                 )
                 loss_keypoint = dict(loss_keypoint=loss_keypoint)
-            else:
-                keypoints_probs, kp_scores = keypointrcnn_inference(
-                    keypoint_logits, keypoint_proposals
-                )
+            if eval_when_train:
+                keypoints_probs, kp_scores = keypointrcnn_inference(keypoint_logits, keypoint_proposals)
                 for keypoint_prob, kps, r in zip(keypoints_probs, kp_scores, result):
                     r["keypoints"] = keypoint_prob
                     r["keypoints_scores"] = kps
@@ -1014,3 +1143,48 @@ def maskrcnn_loss_focal(
         mask_targets,
     )
     return mask_loss
+
+
+
+class TorchModelAnalyzer:
+    def __init__(self, kernel):
+        self.activation = {}
+        self.kernel = kernel
+
+    def get_output_saved(self, name):
+        self.activation[name] = []
+        def rpn_output_hook(model, input, output):
+            if name == 'roi_heads':
+                self.activation[name].append( self.roi_heads_output_detach(output) )
+        return rpn_output_hook
+
+    #def put_one_predict(self, name, detached_output):
+
+    def print_output(self, name):
+        print(self.activation.get(name, f'output information for {name} not found'))
+
+
+    def test_out_threshold(self, activations):
+        stat_for_threshold = {}
+        pred_for_threshold = {}
+        for threshold in [0.5, 0.52, 0.55, 0.6]:
+            preds, stat = self.kernel.predict_rle_from_acts_with_threshold(activations, threshold)
+
+            stat_for_threshold[threshold] = stat
+            pred_for_threshold[threshold] = preds
+            set_trace()
+            #print(self.metric_cal(preds))
+
+        utils.dump_obj(stat_for_threshold, 'stat_for_threshold.pkl', force=True)
+        utils.dump_obj(pred_for_threshold, 'pred_for_threshold.pkl', force=True)
+
+    def metric_cal(self, preds):
+        pass
+
+    @staticmethod
+    def roi_heads_output_detach(output):
+        return [{k:v.detach().cpu().numpy() for k, v in dict.items()} for dict in output[0]], {k:v.detach().cpu().numpy() for k, v in output[1].items()}
+
+    @staticmethod
+    def register_forward_hook(module, func_to_hook):
+        module.register_forward_hook(func_to_hook)

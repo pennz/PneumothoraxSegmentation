@@ -24,6 +24,7 @@ from tensorflow.python.ops import math_ops
 from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from fastai.callbacks import csv_logger
 from tqdm import tqdm
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -854,8 +855,8 @@ class PS_TF_DataHandler:
 def _bytes_feature(value):
     """Returns a bytes_list from a string / byte."""
     if isinstance(value, type(tf.constant(0))):
-        # BytesList won't unpack a string from an EagerTensor.
         value = value.numpy()
+        # BytesList won't unpack a string from an EagerTensor.
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 
@@ -868,14 +869,137 @@ def _int64_feature(value):
     """Returns an int64_list from a bool / enum / int / uint."""
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
-
 def _int64_feature_from_list(value):
     """Returns an int64_list from a bool / enum / int / uint."""
     return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
 
 
-# Evaluation metric
-# ref https://www.kaggle.com/jesperdramsch/intro-chest-xray-dicom-viz-u-nets-full-data
+    def set_metrics(self):
+        """
+        set_metrics for model training
+
+        :return: None
+        """
+        pass
+
+    def set_result_analyzer(self):
+        pass
+
+    def pre_prepare_data_hook(self):
+        pass
+
+    def after_prepare_data_hook(self):
+        pass
+
+    def prepare_train_dev_data(self):
+        pass
+
+    def prepare_test_data(self):
+        pass
+
+    def predict_on_test(self):
+        pass
+
+    def dump_state(self, exec_flag=False, force=True):
+        logger.debug(f'state {self._stage}')
+        if exec_flag:
+            logger.debug(f'dumping state {self._stage}')
+            dump_obj(self, f'run_state_{self._stage}.pkl', force=force)
+            #dump_obj(self, 'run_state.pkl', force=True)  # too large
+
+    def run(self, start_stage=None, end_stage=KernelRunningState.SAVE_SUBMISSION_DONE, dump_flag=False, force_dump=True):
+        """
+
+        :param start_stage: if set, will overwrite the stage
+        :param end_stage:
+        :param dump_flag:
+        :return:
+        """
+        self.continue_run(start_stage=start_stage, end_stage=end_stage, dump_flag=dump_flag, force_dump=force_dump)
+
+    def continue_run(self, start_stage=None, end_stage=KernelRunningState.SAVE_SUBMISSION_DONE, dump_flag=False, force_dump=True):
+        if start_stage is not None:
+            assert start_stage.value < end_stage.value
+            self._stage = start_stage
+
+        if self._stage.value < KernelRunningState.PREPARE_DATA_DONE.value:
+            self.pre_prepare_data_hook()
+            self.prepare_train_dev_data()
+            self.after_prepare_data_hook()
+
+            self._stage = KernelRunningState.PREPARE_DATA_DONE
+            self.dump_state(exec_flag=dump_flag, force=force_dump)
+            if self._stage.value >= end_stage.value: return
+
+        if self._stage.value < KernelRunningState.TRAINING_DONE.value:
+            self.pre_train()
+            self.build_and_set_model()
+            self.train_model()
+            self.after_train()
+
+            self.save_model()
+
+            self._stage = KernelRunningState.TRAINING_DONE
+            self.dump_state(exec_flag=dump_flag, force=force_dump)
+            if self._stage.value >= end_stage.value: return
+
+        if self._stage.value < KernelRunningState.EVL_DEV_DONE.value:
+            self.set_result_analyzer()
+
+            self._stage = KernelRunningState.EVL_DEV_DONE
+            self.dump_state(exec_flag=False, force=force_dump)
+            if self._stage.value >= end_stage.value: return
+
+        if self._stage.value < KernelRunningState.SAVE_SUBMISSION_DONE.value:
+            self.pre_test()
+            self.prepare_test_data()
+            self.predict_on_test()
+            self.after_test()
+
+            self._stage = KernelRunningState.SAVE_SUBMISSION_DONE
+            self.dump_state(exec_flag=False, force=force_dump)
+            if self._stage.value >= end_stage.value: return
+
+    @classmethod
+    def _load_state(cls, stage=None, file_name='run_state.pkl'):
+        """
+
+        :param file_name:
+        :return: the kernel object, need to continue
+        """
+        if stage is not None:
+            file_name = f'run_state_{stage}.pkl'
+        logger.debug(f'restore from {file_name}')
+        return get_obj_or_dump(filename=file_name)
+
+    def load_state_data_only(self, file_name='run_state.pkl'):
+        pass
+
+    @classmethod
+    def load_state_continue_run(cls, file_name='run_state.pkl'):
+        """
+
+        :param file_name:
+        :return: the kernel object, need to continue
+        """
+        self = cls._load_state(file_name=file_name)
+        self.continue_run()
+
+    def pre_train(self):
+        pass
+
+    def after_train(self):
+        pass
+
+    def pre_test(self):
+        pass
+
+    def after_test(self):
+        pass
+
+
+#Evaluation metric
+#ref https://www.kaggle.com/jesperdramsch/intro-chest-xray-dicom-viz-u-nets-full-data
 def dice_coef(y_true, y_pred, smooth=1, threshold=0.5):
     threshold = math_ops.cast(threshold, y_pred.dtype)
 
@@ -1384,7 +1508,49 @@ def online_mean_and_sd(loader, data_map=None):
     return fst_moment, np.sqrt(snd_moment - fst_moment ** 2)
 
 
-# dataset = MyDataset() loader = DataLoader( dataset, batch_size=1,
-# num_workers=1, shuffle=False)
-#
-# mean, std = online_mean_and_sd(loader)
+class CSVLoggerBufferCustomized(csv_logger.CSVLogger):
+    "A `LearnerCallback` that saves history of metrics while training `learn` into CSV `filename`."
+    def __init__(self, learn:fastai.basic_train.Learner, filename: str = 'history', append: bool = False, buffer_type: int = 1):
+        super(CSVLoggerBufferCustomized, self).__init__(learn, filename, append)
+        self.buffer_type = buffer_type  # flush the file to get quick result
+
+    def on_train_begin(self, **kwargs) -> None:
+        "Prepare file with metric names."
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.file = self.path.open('a', buffering=self.buffer_type) if self.append else self.path.open('w', buffering=self.buffer_type)
+        self.file.write(','.join(self.learn.recorder.names[:(None if self.add_time else -1)]) + '\n')
+
+
+from subprocess import Popen, PIPE
+
+
+def download_file_one_at_a_time(file_name, directory=".", overwrite=True):
+    if overwrite:
+        run_process_print("wget http://23.105.212.181:8000/{0} -O \"{1}/{0}\"".format(file_name, directory))
+    else:
+        run_process_print("[ -f {1}/{0} ] || wget http://23.105.212.181:8000/{0} -P {1}".format(file_name, directory))
+
+
+def run_process_print(command_str):
+    print(command_str.split())
+    get_ipython().system(command_str)
+
+
+def setup_gdrive():
+    download_file_one_at_a_time("gdrive")
+    s = """chmod +x ./gdrive
+    mkdir $HOME/.gdrive 
+    chmod +x ./gdrive
+    """
+
+    [(print(c.strip()), run_process_print(c.strip())) for c in s.split('\n')]
+    # download_file_one_at_a_time("token_v2.json", "$HOME/.gdrive")
+    str = """{
+        "access_token": "ya29.GlsWB6DpEzK1qbegW-7FGy84GUtdR8O57aoq3i73DiFLlwpGxG1hZGwCVLiBIFNCDIw0zgQ6Fs4aBkf1YWbc30_yJMLCtv1E1b20nqMF2gRF3cJU_Ks-xnsaF5WV",
+        "token_type": "Bearer",
+        "refresh_token": "1/uxgj61NZOFM_LkIZd6QHpGX0Nj8bm9004DK68Ywu0pU",
+        "expiry": "2019-05-27T06:11:29.604819094-04:00"
+    }"""
+    with open("token_v2.json", 'wb') as f:
+        f.write(bytes(str, 'utf-8'))
+    run_process_print('mv token_v2.json $HOME/.gdrive')
