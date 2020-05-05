@@ -2,8 +2,6 @@ import logging
 from enum import Enum
 
 from IPython.core.debugger import set_trace
-from tensorflow.keras.models import Model
-from tensorflow.python.ops import math_ops
 
 import utils
 
