@@ -12,11 +12,9 @@ from torch.autograd import Variable
 
 import kernel
 import PSKernel
-
 # import modelTester
 import pytorchKernel
 import runner
-
 # from kernel import Kernel
 import utils
 from kernel import KernelRunningState
@@ -262,6 +260,7 @@ class TestPytorchKernel:
         kernel_load_back.build_and_set_model()
         kernel_load_back.train_model()
 
+    @pytest.mark.skip("we train more")
     def test_pytorch_cv_train_dev(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
 
@@ -276,14 +275,14 @@ class TestPytorchKernel:
         k.logger.debug("end train one epoch")
         assert True
 
-    @pytest.mark.skip()
     def test_pytorch_cv_train_more(self, mq_logger):
         k = pytorchKernel.PS_torch(mq_logger)
 
-        k._debug_less_data = True
+        # k._debug_less_data = True
         k.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
 
         k.build_and_set_model()
+        k.logger.debug("start train 5 epochs")
         k.num_epochs = 5
         k.train_model()
 
