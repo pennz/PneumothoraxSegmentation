@@ -227,6 +227,7 @@ class PS_torch(KaggleKernel):
                        for t in targets]
 
             loss_dict = model(images, targets)
+            # it just pop.. and we do not train rpn anyway!!!!
             loss_dict.pop("loss_rpn_box_reg")
 
             #losses = sum(loss for loss in loss_dict.values())
