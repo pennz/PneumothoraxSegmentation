@@ -243,7 +243,7 @@ class PS_torch(KaggleKernel):
             if warm_up_lr_scheduler is not None:  # only for epoch 0, warm up
                 warm_up_lr_scheduler.step()
 
-            if mq_logger is not None:
+            if mq_logger is not None:  # issue is it runs off... So NAN
                 mq_logger.debug(
                     f"losses summed is {losses_summed}, cnt is {cnt}")
                 print(
