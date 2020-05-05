@@ -438,6 +438,7 @@ class PS_torch(KaggleKernel):
 
     def load_model_weight_continue_train(self):
         self.build_and_set_model()
+        assert os.path.exists("cv_model.pth")
         self.model_ft.load_state_dict(torch.load("cv_model.pth"))
         self.model_ft.eval()
 
@@ -833,7 +834,6 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
         head.forward = types.MethodType(RoIHeads_loss_customized.forward, head)
 
     # def forward(self, features, proposals, image_shapes, targets=None):
-    @pysnooper.snoop()
     def forward(self, features, proposals, image_shapes, targets=None):
         """
         Arguments:
@@ -899,7 +899,6 @@ class RoIHeads_loss_customized(roi_heads.RoIHeads):
             mask_logits = self.mask_predictor(mask_features)
 
             loss_mask = {}
-            pdb.set_trace()
             if self.training:
                 gt_masks = [t["masks"] for t in targets]
                 gt_labels = [t["labels"] for t in targets]

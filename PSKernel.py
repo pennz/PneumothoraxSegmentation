@@ -132,7 +132,6 @@ class PS(KaggleKernel):
         return imgs
 
     def prepare_train_dev_data(self):
-        pdb.set_trace()
         if self.use_tf_data:
             self._prepare_train_data_as_tf()
         else:
