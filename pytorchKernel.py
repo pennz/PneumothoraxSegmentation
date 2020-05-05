@@ -11,7 +11,6 @@ import types  # for bound new forward function for RoIHeads
 
 import numpy as np
 import pandas as pd
-import pydicom
 import pysnooper
 import torch
 import torch.distributed as dist
@@ -30,18 +29,17 @@ from torchvision import transforms
 from torchvision.models.detection import _utils as det_utils
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
-from torchvision.models.detection.roi_heads import (
-    fastrcnn_loss,
-    keypointrcnn_inference,
-    keypointrcnn_loss,
-    maskrcnn_inference,
-    maskrcnn_loss,
-)
+from torchvision.models.detection.roi_heads import (fastrcnn_loss,
+                                                    keypointrcnn_inference,
+                                                    keypointrcnn_loss,
+                                                    maskrcnn_inference,
+                                                    maskrcnn_loss)
 from torchvision.ops import boxes as box_ops
 from torchvision.ops import roi_align
 from tqdm import tqdm
 
 import kernel
+import pydicom
 import utils
 from kernel import KaggleKernel
 
@@ -198,7 +196,8 @@ class PS_torch(KaggleKernel):
 
     @staticmethod
     def train_one_epoch(
-        model, optimizer, data_loader, device, epoch, metric_logger, print_freq
+        model, optimizer, data_loader, device, epoch, metric_logger, print_freq,
+        mq_logger=None
     ):
         model.train()
         # metric_logger = utils.MetricLogger(delimiter="  ")
@@ -244,6 +243,11 @@ class PS_torch(KaggleKernel):
             if warm_up_lr_scheduler is not None:  # only for epoch 0, warm up
                 warm_up_lr_scheduler.step()
 
+            if mq_logger is not None:
+                mq_logger.debug(
+                    f"losses summed is {losses_summed}, cnt is {cnt}")
+                print(
+                    f"losses summed is {losses_summed}, cnt is {cnt}, loss_dict_reduced is {loss_dict_reduced}")
             metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
             metric_logger.update(lr=optimizer.param_groups[0]["lr"])
 
@@ -325,7 +329,7 @@ class PS_torch(KaggleKernel):
         # create mask rcnn model
         num_classes = 2
         self.device = torch.device(
-            "cuda:0"
+            "cpu"
         )  # TODO check if cuda is supported, or we just use cpu
 
         # more details at https://pytorch.org/tutorials/intermediate/torchvision_tutorial.html
@@ -409,6 +413,7 @@ class PS_torch(KaggleKernel):
                 epoch,
                 self.metric_logger,
                 print_freq=600,
+                self.logger,
             )
             self.metric_logger.print_and_log_to_file(
                 f"train_loss (averaged) is {train_loss}"
