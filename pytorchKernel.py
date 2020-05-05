@@ -150,12 +150,14 @@ class PS_torch(KaggleKernel):
                 loss_dict = model(images, targets)
                 loss_dict.pop("loss_rpn_box_reg")
 
-                losses = sum(loss for loss in loss_dict.values())
+                # losses = sum(loss for loss_name, loss in loss_dict.items(
+                # ) if loss_name != "loss_box_reg")
 
                 # reduce losses over all GPUs for logging purposes
                 loss_dict_reduced = utils.reduce_dict(loss_dict)
                 losses_reduced = sum(
-                    loss for loss in loss_dict_reduced.values())
+                    loss for loss_name, loss in loss_dict_reduced.items(
+                    ) if loss_name != "loss_box_reg")
                 losses_summed += losses_reduced.detach().cpu().numpy()
                 cnt += 1
 
@@ -227,11 +229,15 @@ class PS_torch(KaggleKernel):
             loss_dict = model(images, targets)
             loss_dict.pop("loss_rpn_box_reg")
 
-            losses = sum(loss for loss in loss_dict.values())
+            #losses = sum(loss for loss in loss_dict.values())
+            losses = sum(loss for loss_name, loss in loss_dict.items(
+            ) if loss_name != "loss_box_reg")
 
             # reduce losses over all GPUs for logging purposes
             loss_dict_reduced = utils.reduce_dict(loss_dict)
-            losses_reduced = sum(loss for loss in loss_dict_reduced.values())
+            losses_reduced = sum(
+                loss for loss_name, loss in loss_dict_reduced.items(
+                ) if loss_name != "loss_box_reg")
 
             optimizer.zero_grad()
             losses.backward()
