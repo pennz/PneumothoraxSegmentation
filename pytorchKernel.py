@@ -413,7 +413,7 @@ class PS_torch(KaggleKernel):
                 epoch,
                 self.metric_logger,
                 print_freq=600,
-                self.logger,
+                mq_logger=self.logger,
             )
             self.metric_logger.print_and_log_to_file(
                 f"train_loss (averaged) is {train_loss}"
