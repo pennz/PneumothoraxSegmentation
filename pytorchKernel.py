@@ -244,8 +244,10 @@ class PS_torch(KaggleKernel):
                 warm_up_lr_scheduler.step()
 
             if mq_logger is not None:
-                mq_logger.debug(f"losses summed is {losses_summed}, cnt is {cnt}")
-                print.debug(f"losses summed is {losses_summed}, cnt is {cnt}")
+                mq_logger.debug(
+                    f"losses summed is {losses_summed}, cnt is {cnt}")
+                print(
+                    f"losses summed is {losses_summed}, cnt is {cnt}, loss_dict_reduced is {loss_dict_reduced}")
             metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
             metric_logger.update(lr=optimizer.param_groups[0]["lr"])
 
