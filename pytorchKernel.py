@@ -324,7 +324,9 @@ class PS_torch(KaggleKernel):
     def build_and_set_model(self):
         # create mask rcnn model
         num_classes = 2
-        self.device = torch.device("cuda:0")
+        self.device = torch.device(
+            "cuda:0"
+        )  # TODO check if cuda is supported, or we just use cpu
 
         # more details at https://pytorch.org/tutorials/intermediate/torchvision_tutorial.html
 
