@@ -1137,7 +1137,7 @@ class MetricLogger(object):
                 "{meters}",
                 "time: {time}",
                 "data: {data}",
-                "max mem: {memory:.0f}",
+                # "max mem: {memory:.0f}",
             ]
         )
         MB = 1024.0 * 1024.0
@@ -1157,7 +1157,7 @@ class MetricLogger(object):
                         meters=str(self),
                         time=str(iter_time),
                         data=str(data_time),
-                        memory=torch.cuda.max_memory_allocated() / MB,
+                        # memory=torch.cuda.max_memory_allocated() / MB,
                     )
                 )
             i += 1
