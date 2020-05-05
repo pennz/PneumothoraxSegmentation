@@ -412,7 +412,7 @@ class PS_torch(KaggleKernel):
                 self.device,
                 epoch,
                 self.metric_logger,
-                print_freq=600,
+                print_freq=10,
                 mq_logger=self.logger,
             )
             self.metric_logger.print_and_log_to_file(
@@ -426,7 +426,7 @@ class PS_torch(KaggleKernel):
                     self.data_loader_dev,
                     self.device,
                     self.metric_logger,
-                    print_freq=150,
+                    print_freq=10,
                 )
                 self.metric_logger.print_and_log_to_file(
                     f"\nmetric (averaged) is {metric}\n"
