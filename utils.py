@@ -29,8 +29,8 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from tqdm import tqdm
 
-from IPython.core.debugger import set_trace()
 trace_flag = True
+
 
 def my_trace():
     if trace_flag:
@@ -76,11 +76,11 @@ BIN_FOLDER = (
 )
 
 
-def get_logger():
+def get_logger(name="utils", level=logging.DEBUG):
     FORMAT = "[%(levelname)s]%(asctime)s:%(name)s:%(message)s"
     logging.basicConfig(format=FORMAT)
-    logger = logging.getLogger("main")
-    logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
     return logger
 
 
