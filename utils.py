@@ -29,6 +29,14 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from tqdm import tqdm
 
+from IPython.core.debugger import set_trace()
+trace_flag = True
+
+def my_trace():
+    if trace_flag:
+        set_trace()
+
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
