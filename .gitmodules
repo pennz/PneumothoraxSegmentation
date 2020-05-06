@@ -1,6 +1,6 @@
-[submodule "DAF3D"]
-	path = DAF3D
-	url = ./DAF3D
 [submodule "DAF2D"]
 	path = DAF2D
+	url = git@github.com:pennz/DAF3D
+[submodule "DAF3D"]
+	path = DAF3D
 	url = git@github.com:pennz/DAF3D
