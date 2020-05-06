@@ -24,6 +24,7 @@ from tensorflow.python.ops import math_ops
 from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+import fastai
 from fastai.callbacks import csv_logger
 from tqdm import tqdm
 
