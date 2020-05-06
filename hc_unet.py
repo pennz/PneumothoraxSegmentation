@@ -12,6 +12,7 @@
 # * we can add mixup
 
 import gc
+import subprocess
 import sys
 
 import fastai
@@ -50,7 +51,7 @@ sys.path.insert(0, "../input/siim-acr-pneumothorax-segmentation")
 
 # copy pretrained weights for resnet34 to the folder fastai will search by default
 Path("/tmp/.cache/torch/checkpoints/").mkdir(exist_ok=True, parents=True)
-get_ipython().system(
+subprocess.run(
     "cp '../input/resnet34/resnet34.pth' '/tmp/.cache/torch/checkpoints/resnet34-333f7ec4.pth'"
 )
 
