@@ -290,8 +290,17 @@ class DAF2D(DAF3D):
         predict = F.interpolate(predict_undersample, size=x.size()[
                                 2:], mode="bilinear")
         if self.training:
-            return predict1_1, predict1_2, predict1_3, predict1_4, \
-                predict2_1, predict2_2, predict2_3, predict2_4, predict
+            return (
+                predict1_1,
+                predict1_2,
+                predict1_3,
+                predict1_4,
+                predict2_1,
+                predict2_2,
+                predict2_3,
+                predict2_4,
+                predict,
+            )
         else:
             return predict
 
@@ -865,10 +874,12 @@ if __name__ == "__main__":
         if debug_trace:
             set_trace()
 
+        predict_on_test_post_process(k, output_WIP[0], thr=0.9)
+
         rles = []
         rlesNoT = []
         t = torchvision.transforms.ToPILImage()
-        for p in progress_bar(output_WIP):
+        for p in progress_bar(output_WIP[0]):
             im = t(p)
             # p_1_channel=(p.T * 255).astype(np.uint8)
             im = im.resize((1024, 1024))
@@ -884,8 +895,6 @@ if __name__ == "__main__":
             rlesNoT.append(mask2rle(im, 1024, 1024))
             del im
             del im_4_rle
-
-        predict_on_test_post_process(k, output_WIP[0], thr=0.9)
 
         ids = [o.stem for o in k.learn.data.test_ds.items]
         sub_df = pd.DataFrame({"ImageId": ids, "EncodedPixels": rles})
