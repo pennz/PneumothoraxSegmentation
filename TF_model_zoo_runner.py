@@ -25,7 +25,7 @@ if StrictVersion(tf.__version__) < StrictVersion("1.12.0"):
         "Please upgrade your TensorFlow installation to v1.12.*.")
 
 
-class TF_model_zoo_tester:
+class TF_model_zoo_runner:
     def __init__(self):
         self._cwd_ = "/content/models/research"
         os.chdir(self._cwd_)
