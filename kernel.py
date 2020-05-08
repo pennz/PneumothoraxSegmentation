@@ -56,6 +56,15 @@ class KaggleKernel:
 
         self._stage = KernelRunningState.INIT_DONE
         self.logger = logger
+        self.dependency = []
+
+    def _add_dependency(self, dep):
+        """add_dependency just install pip dependency now
+        """
+        self.dependency.append(dep)
+
+    def install_dependency(self, dep):
+        self.add_dependency(dep)
 
     def _add_logger_handler(self, handler):
         self.logger.addHandler(handler)
@@ -171,7 +180,7 @@ class KaggleKernel:
             self.train_model()
             self.after_train()
 
-            self.save_model()
+            self.save_model()  # during training, it will also save model
 
             self._stage = KernelRunningState.TRAINING_DONE
             self.dump_state(exec_flag=dump_flag)
@@ -191,6 +200,10 @@ class KaggleKernel:
             self.prepare_test_data()
             self.predict_on_test()
             self.after_test()
+
+            self.pre_submit()
+            self.submit()
+            self.after_submit()
 
             self._stage = KernelRunningState.SAVE_SUBMISSION_DONE
             self.dump_state(exec_flag=dump_flag)
@@ -230,6 +243,16 @@ class KaggleKernel:
         pass
 
     def after_train(self):
+        pass
+
+    def pre_submit(self):
+        pass
+
+    def submit(self):
+        pass
+
+    def after_submit(self):
+        "after_submit should report to our logger, for next step analyze"
         pass
 
     def pre_test(self):
