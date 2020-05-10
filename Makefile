@@ -5,6 +5,7 @@ PY3=/home/v/miniconda3/envs/pyt/bin/python3
 SRC=$(wildcard *.py)
 
 all: $(SRC)
+	git push
 	cc-test-reporter before-build
 	-coverage run -m pytest .
 	coverage xml
