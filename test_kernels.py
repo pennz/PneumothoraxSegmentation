@@ -163,6 +163,7 @@ class TestPSKernel:
         kernel_load_back.run()
         assert kernel_load_back._stage == KernelRunningState.SAVE_SUBMISSION_DONE
 
+    @pytest.mark.skip("take too long to test, just skip")
     def test_train(self, mq_logger):
         # kernel_load_back = kernel.KaggleKernel._load_state(
         #     KernelRunningState.PREPARE_DATA_DONE, logger=mq_logger
@@ -179,6 +180,7 @@ class TestPSKernel:
         # end_stage=KernelRunningState.TRAINING_DONE)
         assert k.ds is not None
 
+    @pytest.mark.skip("take too long to test, just skip")
     def test_convert_tf_from_start(self, mq_logger):  # won't work
         ps_kernel = PSKernel.PS(mq_logger)
         ps_kernel.run(end_stage=KernelRunningState.PREPARE_DATA_DONE)
@@ -194,6 +196,7 @@ class TestPSKernel:
     #    self.assertTrue(os.path.isfile('train.tfrec'))
 
 
+@pytest.mark.skip("take too long to test, just skip")
 class TestPytorchKernel:
     @classmethod
     def setup_class(cls):
