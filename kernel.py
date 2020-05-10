@@ -56,6 +56,15 @@ class KaggleKernel:
 
         self._stage = KernelRunningState.INIT_DONE
         self.logger = logger
+        self.dependency = []
+
+    def _add_dependency(self, dep):
+        """add_dependency just install pip dependency now
+        """
+        self.dependency.append(dep)
+
+    def install_dependency(self, dep):
+        self.add_dependency(dep)
 
     def _add_logger_handler(self, handler):
         self.logger.addHandler(handler)
@@ -171,7 +180,7 @@ class KaggleKernel:
             self.train_model()
             self.after_train()
 
-            self.save_model()
+            self.save_model()  # during training, it will also save model
 
             self._stage = KernelRunningState.TRAINING_DONE
             self.dump_state(exec_flag=dump_flag)
@@ -192,13 +201,61 @@ class KaggleKernel:
             self.predict_on_test()
             self.after_test()
 
+            self.pre_submit()
+            self.submit()
+            self.after_submit()
+
             self._stage = KernelRunningState.SAVE_SUBMISSION_DONE
             self.dump_state(exec_flag=dump_flag)
             if self._stage.value >= end_stage.value:
                 return
 
-    @classmethod
-    def _load_state(cls, stage=None, file_name="run_state.pkl", logger=None):
+
+"""
+size = 512
+mean = (0.485, 0.456, 0.406)
+std = (0.229, 0.224, 0.225)
+num_workers = 8
+batch_size = 16
+best_threshold = 0.5
+min_size = 3500
+device = torch.device("cuda:0")
+df = pd.read_csv(sample_submission_path)
+testset = DataLoader(
+    TestDataset(test_data_folder, df, size, mean, std),
+    batch_size=batch_size,
+    shuffle=False,
+    num_workers=num_workers,
+    pin_memory=True,
+)
+model = model_trainer.net # get the model from model_trainer object
+model.eval()
+state = torch.load('./model.pth', map_location=lambda storage, loc: storage)
+model.load_state_dict(state["state_dict"])
+encoded_pixels = []
+for i, batch in enumerate(tqdm(testset)):
+    preds = torch.sigmoid(model(batch.to(device)))
+    # (batch_size, 1, size, size) -> (batch_size, size, size)
+    preds = preds.detach().cpu().numpy()[:, 0, :, :]
+    for probability in preds:
+        if probability.shape != (1024, 1024):
+            probability = cv2.resize(probability, dsize=(
+                1024, 1024), interpolation=cv2.INTER_LINEAR)
+        predict, num_predict = post_process(
+            probability, best_threshold, min_size)
+        if num_predict == 0:
+            encoded_pixels.append('-1')
+        else:
+            r = run_length_encode(predict)
+            encoded_pixels.append(r)
+df['EncodedPixels'] = encoded_pixels
+df.to_csv('submission.csv', columns=['ImageId', 'EncodedPixels'], index=False)
+
+df.head()
+"""
+
+  @classmethod
+   def _load_state(cls, stage=None, file_name="run_state.pkl", logger=None):
         """
 
         :param file_name:
@@ -230,6 +287,16 @@ class KaggleKernel:
         pass
 
     def after_train(self):
+        pass
+
+    def pre_submit(self):
+        pass
+
+    def submit(self):
+        pass
+
+    def after_submit(self):
+        "after_submit should report to our logger, for next step analyze"
         pass
 
     def pre_test(self):

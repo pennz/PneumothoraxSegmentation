@@ -66,6 +66,46 @@ def mq_logger():
     return _mq_logger
 
 
+class TestModelBasic:
+    ModelList = []
+
+    def test_creation(self):
+        pass
+
+    def test_load_model(self):
+        pass
+
+    def test_eval(self):
+        pass
+
+    def test_dataloaders(self):
+        """test_dataloaders uses codes from unet-with-se-resnet ..., it uses
+        provider to generate dataloader"""
+        dataloader = provider(
+            fold=0,
+            total_folds=5,
+            data_folder=data_folder,
+            df_path=train_rle_path,
+            phase="train",
+            size=512,
+            mean=(0.485, 0.456, 0.406),
+            std=(0.229, 0.224, 0.225),
+            batch_size=16,
+            num_workers=2,
+        )
+
+        batch = next(iter(dataloader))  # get a batch from the dataloader
+        images, masks = batch
+
+        # plot some random images in the `batch`
+        idx = random.choice(range(16))
+        plt.imshow(images[idx][0], cmap="bone")
+        plt.imshow(masks[idx][0], alpha=0.2, cmap="Reds")
+        plt.show()
+        if len(np.unique(masks[idx][0])) == 1:  # only zeros
+            print("Chosen image has no ground truth mask, rerun the cell")
+
+
 class TestMQLogger:
     def test_runner_create(self, args):
         r = runner.Runner(
