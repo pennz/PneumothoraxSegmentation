@@ -72,7 +72,7 @@ class Runner:  # blade runner
 
         """
 
-        logger = utils.get_logger("runner")
+        logger = utils.get_logger(name="runner")
         rabbit = RabbitMQHandler(
             host=self.AMQPURL.host,
             port=5672,
